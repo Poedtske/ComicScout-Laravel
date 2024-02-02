@@ -1,0 +1,88 @@
+:root {
+    --header-height: 5rem;
+}
+
+* {
+    padding: 0;
+    margin: 0;
+}
+
+button {
+    cursor: pointer;
+}
+
+img {
+    display: block;
+    max-width: 100%;
+}
+
+html {
+    color-scheme: dark;
+}
+
+body {
+    display: grid;
+
+    min-height: 100vh;
+    padding-top: var(--header-height);
+    font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+}
+
+main {
+    display: grid;
+    margin: 0 auto 0 auto;
+    grid-template-columns: 400px 400px 400px;
+    justify-items: center;
+    gap: 2rem;
+    padding-block: 2.5rem;
+    transition: 0.3s;
+}
+
+main section p {
+    padding-bottom: 3em;
+    padding-top: 3em;
+}
+main #top {
+    padding-top: 0;
+}
+main h1 {
+    padding-top: 3em;
+}
+/* #trumpet{
+  grid-column-start: 1;
+  grid-row-start: 2;
+}
+#trumpetText{
+  grid-column-start: 2;
+  grid-row-start: 2;
+} */
+main section {
+    display: flexbox;
+    width: min(90vw, 30rem);
+    align-self: center;
+    text-align: center;
+    gap: 1rem;
+}
+
+main section img {
+    display: flexbox;
+    margin-left: auto;
+    margin-right: auto;
+}
+@media (max-width: 1280px) {
+    main {
+        grid-template-columns: 400px 400px;
+    }
+    .hidden2 {
+        display: none;
+    }
+}
+@media (max-width: calc(60rem - 1px)) {
+    main {
+        grid-template-columns: 1fr;
+        transition: 0.3s;
+    }
+    .hidden {
+        display: none;
+    }
+}

@@ -1,0 +1,69 @@
+:root {
+    --header-height: 5rem;
+}
+
+* {
+    padding: 0;
+    margin: 0;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+    font-size: 125%;
+}
+
+button {
+    cursor: pointer;
+}
+
+img {
+    display: block;
+    max-width: 100%;
+}
+
+html {
+    color-scheme: dark;
+}
+
+body {
+    display: grid;
+
+    min-height: 100vh;
+    padding-top: var(--header-height);
+    font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+}
+
+main {
+    display: grid;
+    justify-items: center;
+    gap: 3rem;
+    padding-block: 2.5rem;
+}
+
+main section {
+    width: min(90vw, 55rem);
+    display: grid;
+    gap: 1rem;
+}
+/* #trumpet{
+  grid-column-start: 1;
+  grid-row-start: 2;
+}
+#trumpetText{
+  grid-column-start: 2;
+  grid-row-start: 2;
+} */
+main section {
+    display: flexbox;
+    width: min(90vw, 55rem);
+    align-self: center;
+    text-align: left;
+    gap: 1rem;
+}
+
+main section img {
+    display: flexbox;
+    margin-left: auto;
+    margin-right: auto;
+}

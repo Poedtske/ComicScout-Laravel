@@ -1,0 +1,134 @@
+:root {
+  --header-height: 5rem;
+}
+
+* {
+  padding: 0;
+  margin: 0;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+  font-size: 125%;
+}
+
+a,
+button {
+  transition: 0.3s;
+}
+
+button {
+  cursor: pointer;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  display: grid;
+
+  min-height: 100vh;
+  padding-top: var(--header-height);
+  font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+}
+header{
+  z-index:1;
+}
+  
+main {
+  display: grid;
+  margin: 0 auto 0 auto;
+  grid-template-columns: repeat(5, auto) 1fr;
+  justify-items: center;
+  gap: 2rem;
+  
+  transition: 0.3s;
+  z-index: 0;
+}
+
+main section p{
+  padding-bottom: 3em;
+  padding-top: 3em;
+}
+/* #trumpet{
+  grid-column-start: 1;
+  grid-row-start: 2;
+}
+#trumpetText{
+  grid-column-start: 2;
+  grid-row-start: 2;
+} */
+main section {
+  display: flexbox;
+  align-self: center;
+  text-align: center;
+  gap: 1rem;
+}
+
+/* main section img{
+  display: flexbox;
+  margin-left: auto;
+  margin-right: auto;
+} */
+
+main img {
+  /* --img-width:200px;
+  width: var(--img-width); */
+  object-fit: cover;
+  object-position: center;
+  border-radius: 10%;
+}
+main button {
+  /* width: var(--img-width); */
+  aspect-ratio: 1;
+  border-radius: 10%;
+  justify-self: center;
+  overflow: hidden;
+  background-color: #121212;
+  border: none;
+}
+
+.no_website:hover{
+  scale:1;
+  cursor:auto;
+}
+
+main :is(a, button):hover {
+  scale: 1.15;
+}
+
+
+
+
+@media (max-width: 1540px){
+  main{
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    
+  }
+}
+@media (max-width: 1240px){
+  main{
+    grid-template-columns: 1fr 1fr 1fr;
+    
+  }
+}
+@media (max-width: 940px){
+  main{
+    grid-template-columns: 1fr 1fr;
+    
+  }
+}
+@media (max-width: 640px){
+  main{
+    grid-template-columns: 1fr;
+    
+  }
+}
+
