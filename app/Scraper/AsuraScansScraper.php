@@ -68,11 +68,23 @@ class AsuraScansScraper extends Scraper
                     // $seriePublisher = $serieInfo['serieCompany'];
                     $serieType = $serieInfo['serieType'];
                     $serieSrc = $this->src;
-                    //$serieDescription=$serieInfo['serieDescription'];
+                    $serieDescription=$serieInfo['serieDescription'];
                     $serieStatus = $serieInfo['serieStatus'];
 
-                    echo "\nLink=".$serieLink."\nTitle=".$serieTitle."\nCover=".$serieCover."\nType=".$serieType."\nStatus=".$serieStatus;
+                    //echo "\nLink=".$serieLink."\nTitle=".$serieTitle."\nCover=".$serieCover."\nType=".$serieType."\nStatus=".$serieStatus."\nDescription=".$serieDescription."\nGenres=".$serieInfo["serieGenres"];
+                    //echo $serieDescription;
+                    $array = $serieInfo["serieGenres"];
+foreach ($array as $s) {
+    if (is_string($s)) {
+        echo $s;
+    } else {
+        foreach($s as $i){
+            echo $i;
+        }
+    }
+}
 
+                    sleep(10);
                     // Author=$serieAuthor
                     // Artists=$serieArtists
                     // Publisher=$seriePublisher
@@ -116,6 +128,20 @@ class AsuraScansScraper extends Scraper
         });
 
         //description  search for synopsis
+        //zoek nr synopsis en Genre
+        $genresArray = [];
+        $info = $chapterCrawler->filter('div.bixbox.animefull div.bigcontent.nobigcover div.infox div.wd-full');
+        $info->each(function($node,$index=1) use (&$infoSerie, &$genresArray ) {
+
+            //echo $node->text();
+            if (strpos($node->text(), "Synopsis") !== false) {
+                $infoSerie['serieDescription'] = $node->filter('div p')->text();
+            } elseif (strpos($node->text(), 'Genres') !== false) {
+                $genresArray[] = $node->filter('span a')->each(function ($node){
+                    return $node->text();
+                });
+            }
+            });
 
         // // Extracting genres
         // $genres = $chapterCrawler->querySelector("div.infox div:nth-child(7) span a");
@@ -125,7 +151,7 @@ class AsuraScansScraper extends Scraper
         // });
 
         // Adding genres to infoSerie array
-        //$infoSerie['genres'] = $genresArray;
+        $infoSerie['serieGenres'] = $genresArray;
 
         return $infoSerie;
     }
