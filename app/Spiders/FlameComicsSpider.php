@@ -62,21 +62,32 @@ class FlameComicsSpider extends BasicSpider
      */
     public function parse(Response $response): Generator
     {
-        $title = $response->filter('h1')->text();
+        // $title = $response->filter('h1')->text();
+        // $subtitle = $response
+        //     ->filter('main > div:nth-child(2) p:first-of-type')
+        //     ->text();
 
-#content > div.wrapper > div.postbody > div.bixbox.seriesearch > div.mrgn > div.listupd > div:nth-child(1) > div > a > div.bigor > div.tt
-        $serieList=$response->filter('div.listupd div.bs')->text();
-        $serie=$response->filter('div.listupd div.bs div a')->text();
-        $serieTitle=$response->filter('div.listupd div.bs div a div.bigor div.tt')->text();
-        $serieCover=$response->filter('div.listupd div.bs div a div.limit img')->text();
-        $emptyPageCheck
-        $subtitle = $response
-            ->filter('main > div:nth-child(2) p:first-of-type')
-            ->text();
+        #content > div.wrapper > div.postbody > div.bixbox.seriesearch > div.mrgn > div.listupd > div:nth-child(1) > div > a > div.bigor > div.tt
+        $serieList=$response->filter('div.listupd div.bs');
+        // foreach ($serieList as $serie) {
+        //     $serieLink=$serie->filter('div a')->text();
+        //     $serieTitle=$serie->filter('div a div.bigor div.tt')->text();
+        //     $serieCover=$serie->filter('div a div.limit img')->text();
+        // }
+
+        $serieList->each(function($node){
+            $serieLink= $node->filter('div a')->attr('href');
+            $serieTitle = $node->filter('div a div.bigor div.tt')->text();
+            $serieCover = $node->filter('div a div.limit img')->text();
+        })
+
+        //$emptyPageCheck
+
 
         yield $this->item([
-            'title' => $title,
-            'subtitle' => $subtitle,
+            'serieLink'=>$serieLink,
+            'serieTitle' => $serieTitle,
+            'serieCover' => $serieCover,
         ]);
     }
 }
