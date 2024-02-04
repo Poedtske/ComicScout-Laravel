@@ -85,4 +85,9 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Instrument::class);
     }
+
+    public function bookmarks():BelongsToMany
+    {
+        return $this->belongsToMany(Serie::class);
+    }
 }
