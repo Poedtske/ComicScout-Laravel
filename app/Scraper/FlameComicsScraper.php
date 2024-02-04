@@ -1,26 +1,47 @@
 <?php
 
-require 'vendor/autoload.php';
-
-
+namespace App\Scraper;
 use Symfony\Component\BrowserKit\HttpBrowser;
+use InvalidArgumentException;
 
-class Scraper {
-    private $url;
-    private $src;
+class FlameComicsScraper extends Scraper{
 
     public function __construct($url,$src) {
-        $this->url=$url;
-        $this->src=$src;
+        parent::__construct($url,$src);
+        echo $this->requestCounter;
+    }
+
+    /**
+     * Updates domain name of Scanlater if there is a need to change it
+     */
+    public function updateDomain($newDomainName){
+
+    }
+
+
+
+    /**
+     * Checks chapterAmount in a serie in database and in site and adds the newests if necessary
+     */
+    public function chapterUpdater(){
+
+    }
+/**
+     * Checks  in database and in site and adds the newests if necessary
+     */
+    public function serieUpdater(){
+
     }
 
     public function run() {
         $client = new HttpBrowser();
         $noSeries=false;
-        $index=1;
+        $pageIndex=1;
+        //$requestCounter=0;
         while(!$noSeries){
-            $pageCrawler = $client->request('GET', $this->url.strval($index));
-                $serieList = $pageCrawler->filter('#content > div.wrapper > div.postbody > div.bixbox.seriesearch > div.mrgn > div.listupd > div.bs');
+            self::requestCooldown();
+            $pageCrawler = $client->request('GET', $this->url.strval($pageIndex));
+            $serieList = $pageCrawler->filter('#content > div.wrapper > div.postbody > div.bixbox.seriesearch > div.mrgn > div.listupd > div.bs');
             try {
                     $serieList->text();
                 } catch (InvalidArgumentException) {
@@ -28,27 +49,38 @@ class Scraper {
                     echo "no series on this page";
                 }
             if(!$noSeries){
-                $serieList->each(function($node) {
+                $serieList->each(function($node) use($client) {
+                    //add info of serie we can find on the seriesList page
                     $serieLink = $node->filter('div a')->attr('href');
                     $serieTitle = $node->filter('div a div.bigor div.tt')->text();
                     $serieCover = $node->filter('div a div.limit img')->text();
                     $serieStatus = $node->filter('div a div.bigor div.extra-info div.imptdt div i')->text();
-                    $serieInfo = self::addExtraInfo($serieLink);
+
+                    //go to the specific serie
+                    self::requestCooldown();
+                    $chapterCrawler = $client->request('GET', $serieLink);
+
+                    //add info of serie we can find on the serieSpecific page
+                    $serieInfo = self::addExtraInfo($chapterCrawler);
+
                     $serieAuthor = $serieInfo['serieAuthor'];
                     $serieArtists = $serieInfo['serieArtists'];
                     $seriePublisher = $serieInfo['serieCompany'];
                     $serieType = $serieInfo['serieType'];
                     $serieSrc = $this->src;
-                    self::createChaptors($serieLink);
+                    //TO DO create serie
+
+                    //create chapters
+                    self::createChapters($chapterCrawler);
+
                 });
             }
+            $pageIndex++;
         }
 
     }
 
-    private static function createChaptors($serieLink) {
-        $client = new HttpBrowser();
-        $chapterCrawler = $client->request('GET', $serieLink);
+    protected static function createChapters($chapterCrawler) {
         $chapterList = $chapterCrawler->filter('div.eplister ul li');
         $chapterList->each(function($node) {
             $chapterName = $node->filter('a div.chbox div.eph-num span.chapternum')->text();
@@ -58,9 +90,7 @@ class Scraper {
         });
     }
 
-    private static function addExtraInfo($serieLink) {
-        $client = new HttpBrowser();
-        $chapterCrawler = $client->request('GET', $serieLink);
+    protected static function addExtraInfo($chapterCrawler) {
         $info = $chapterCrawler->filter('div.main-info div.second-half div.left-side div div');
         $infoSerie = [];
         $index = 1;
@@ -95,12 +125,3 @@ class Scraper {
         return $infoSerie;
     }
 }
-
-$s=new Scraper("https://flamecomics.com/series/?page=1","FlameComics");
-$s->run();
-
-
-//echo $serieList->html();
-
-
-
