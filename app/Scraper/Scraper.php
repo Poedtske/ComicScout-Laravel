@@ -26,11 +26,11 @@ abstract class Scraper implements IScraper
     public function requestCooldown()
     {
 
-        echo $this->requestCounter;
+        //echo $this->requestCounter;
         if($this->requestCounter>=10){
-            echo 'going to sleep';
+            //echo 'going to sleep';
             $this->counter++;
-            echo $this->counter;
+            //echo $this->counter;
             sleep(30);
             $this->requestCounter=0;
         }

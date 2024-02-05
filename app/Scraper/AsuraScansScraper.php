@@ -63,38 +63,34 @@ class AsuraScansScraper extends Scraper
                     //add info of serie we can find on the serieSpecific page
                     $serieInfo = self::addExtraInfo($chapterCrawler);
 
-                    // $serieAuthor = $serieInfo['serieAuthor'];
-                    // $serieArtists = $serieInfo['serieArtists'];
-                    // $seriePublisher = $serieInfo['serieCompany'];
+                    $serieAuthor = $serieInfo['serieAuthor'];
+                    $serieArtists = $serieInfo['serieArtists'];
+                    $seriePublisher = $serieInfo['serieCompany'];
                     $serieType = $serieInfo['serieType'];
                     $serieSrc = $this->src;
                     $serieDescription=$serieInfo['serieDescription'];
                     $serieStatus = $serieInfo['serieStatus'];
+                    $serieGenres = $serieInfo["serieGenres"];
 
-                    //echo "\nLink=".$serieLink."\nTitle=".$serieTitle."\nCover=".$serieCover."\nType=".$serieType."\nStatus=".$serieStatus."\nDescription=".$serieDescription."\nGenres=".$serieInfo["serieGenres"];
-                    //echo $serieDescription;
-                    $array = $serieInfo["serieGenres"];
-foreach ($array as $s) {
-    if (is_string($s)) {
-        echo $s;
-    } else {
-        foreach($s as $i){
-            echo $i;
-        }
-    }
-}
+                    //echo "\nLink=".$serieLink."\nTitle=".$serieTitle."\nCover=".$serieCover."\nType=".$serieType."\nStatus=".$serieStatus."\nDescription=".$serieDescription.";
+                    // foreach ($serieGenres as $s) {
+                    //     if (is_string($s)) {
+                    //         echo $s;
+                    //     } else {
+                    //         echo "\nGenres=";
+                    //         foreach($s as $i){
+                    //             echo $i;
+                    //         }
+                    //     }
+                    // };
 
-                    sleep(10);
-                    // Author=$serieAuthor
-                    // Artists=$serieArtists
-                    // Publisher=$seriePublisher
-                    // Type=$serieType
-                    // Src=$this->src
-                    // Description=$serieDescription`;
+                    //echo "\nAuthor=".$serieAuthor."\nArtists=".$serieArtists."\nPublisher=".$seriePublisher;
+
                     //TO DO create serie
 
                     //create chapters
-                    //self::createChapters($chapterCrawler);
+                    self::createChapters($chapterCrawler);
+                    //sleep(10);
 
                 });
             }
@@ -104,12 +100,11 @@ foreach ($array as $s) {
     }
 
     protected static function createChapters($chapterCrawler) {
-        $chapterList = $chapterCrawler->filter('div.eplister ul li');
+        $chapterList = $chapterCrawler->filter('#chapterlist ul li');
         $chapterList->each(function($node) {
-            $chapterName = $node->filter('a div.chbox div.eph-num span.chapternum')->text();
+            $chapterName = $node->filter('div  div  a  span.chapternum')->text();
             $chapterUrl = $node->filter('a')->attr('href');
-            echo $chapterName;
-            echo $chapterUrl;
+            //TO DO create chapter
         });
     }
 
@@ -131,9 +126,7 @@ foreach ($array as $s) {
         //zoek nr synopsis en Genre
         $genresArray = [];
         $info = $chapterCrawler->filter('div.bixbox.animefull div.bigcontent.nobigcover div.infox div.wd-full');
-        $info->each(function($node,$index=1) use (&$infoSerie, &$genresArray ) {
-
-            //echo $node->text();
+        $info->each(function($node,) use (&$infoSerie, &$genresArray ) {
             if (strpos($node->text(), "Synopsis") !== false) {
                 $infoSerie['serieDescription'] = $node->filter('div p')->text();
             } elseif (strpos($node->text(), 'Genres') !== false) {
@@ -142,6 +135,38 @@ foreach ($array as $s) {
                 });
             }
             });
+
+        //Author, Publisher and Artists
+        $info = $chapterCrawler->filter('div.bixbox.animefull div.bigcontent.nobigcover div.infox div.flex-wrap');
+        $info->each(function($node,) use (&$infoSerie) {
+            if (strpos($node->text(), "Author") !== false) {
+                $node->filter('div.fmed')->each(function($node,$indexL=1)use(&$infoSerie){
+                    if($node->filter('b')->text()=="Author"){
+                        $infoSerie["serieAuthor"]= $node->filter('span')->text();
+                    }
+                });
+            } elseif (strpos($node->text(), 'Serialization') !== false) {
+                $node->filter('div.fmed')->each(function($node)use(&$infoSerie){
+                    if($node->filter('b')->text()=="Serialization"){
+
+                        $infoSerie["serieCompany"]= $node->filter('span')->text();
+                    }
+                });
+            }
+
+            if (strpos($node->text(), 'Artist') !== false) {
+                $node->filter('div.fmed')->each(function($node)use(&$infoSerie){
+                    if($node->filter('b')->text()=="Artist"){
+                        $infoSerie["serieArtists"]= $node->filter('span')->text();
+                    }
+                });
+            }
+            else{
+                $infoSerie["serieArtists"]= "N/A";
+            }
+            });
+
+
 
         // // Extracting genres
         // $genres = $chapterCrawler->querySelector("div.infox div:nth-child(7) span a");
