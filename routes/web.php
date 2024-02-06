@@ -1,7 +1,7 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
-use Illuminate\Support\Facades\Route;
+use App\Models\Contact;
+use Illuminate\Http\Request;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,18 +13,20 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
-use App\Models\Contact;
+use Illuminate\Support\Facades\Route;
 
-use Illuminate\Http\Request;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ImageController;
-use App\Http\Controllers\QuestionController;
+use App\Http\Controllers\SerieController;
+use App\Http\Controllers\ContactController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Http\Controllers\ContactController;
+use App\Http\Controllers\ScraperController;
 
 Route::get('/', [HomeController::class, 'home'])->name('home2');
 
@@ -36,7 +38,9 @@ Route::get('/kalender',[HomeController::class, 'kalender'])->name('kalender');
 
 Route::get('/jeugd',[HomeController::class, 'jeugd'])->name('jeugd');
 
+//Route::resource('series', SerieController::class);
 
+Route::get('/series/builder',[ScraperController::class,'Builder'])->name('builder');
 
 Route::name('fanfare.')->prefix('fanfare')->group(function(){
     Route::get('/bestuur',[HomeController::class, 'bestuur'])->name('bestuur');

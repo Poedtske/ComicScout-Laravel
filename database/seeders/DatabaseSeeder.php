@@ -187,7 +187,12 @@ class DatabaseSeeder extends Seeder
             $user->instruments()->attach($instruments);
         });
 
-//kud tinder tiran
+        \App\Models\Scanlator::factory()->create([
+            'name' => 'AsuraScans',
+            'url' => 'admin@ehb.be',
+            'logo'=>'Password!321',
+        ]);
+
 
 
 

@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string("company")->nullable();
             $table->string("artists")->nullable();
             $table->string("type")->nullable();
-            $table->string("description")->nullable();
+            $table->longtext("description")->nullable();
             $table->timestamps();
         });
     }
