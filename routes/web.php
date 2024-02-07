@@ -107,6 +107,9 @@ Route::get('/profile/{user_id}', [ProfileController::class, 'showProfile'])->nam
 Route::post('/profile/pro{user_id}', [ProfileController::class, 'promote'])->name('profile.promote')->middleware(['admin']);
 Route::post('/profile/dem{user_id}', [ProfileController::class, 'demote'])->name('profile.demote')->middleware(['admin']);
 
+Route::get('/bookmarks', function(){
+    return view('profile.bookmarks');})->name('bookmarks');
+
 require __DIR__.'/auth.php';
 
 //Auth::routes();

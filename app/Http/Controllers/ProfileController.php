@@ -40,6 +40,9 @@ class ProfileController extends Controller
         $newAdmin->save();
         return Redirect::route('profile.show',$newAdmin->id)->with('status', 'profile-updated');
     }
+    public function Bookmarks(){
+        return view('profile.bookmarks');
+    }
 
     public function showProfile(int $id)
     {
@@ -47,6 +50,8 @@ class ProfileController extends Controller
         $user=User::findOrFail($id);
         return view('profile.show',['user'=>$user]);
     }
+
+
 
     /**
      * Update the user's profile information.
