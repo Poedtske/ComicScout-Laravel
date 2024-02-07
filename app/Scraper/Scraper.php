@@ -13,7 +13,7 @@ abstract class Scraper implements IScraper
     public function __construct() {
         $this->requestCounter=0;
     }
-    protected static function createChapters($chapterCrawler){
+    protected static function createChapters($chapterCrawler,$serie){
 
     }
 

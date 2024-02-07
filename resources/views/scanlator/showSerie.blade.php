@@ -39,4 +39,15 @@
     </div>
   </section>
 
+  <section style="background-color:grey;" class="chaptersFlex-Container">
+    @foreach ($serie->chapters as $chapter)
+        <a href="{{ $chapter->url }}" class="chapterFlex-Item">
+            <button>
+                {{ $chapter->title }} <br>
+                {{ date("d-m-y",strtotime($chapter->created_at)) }}
+            </button>
+        </a>
+    @endforeach
+</section>
+
 @endsection

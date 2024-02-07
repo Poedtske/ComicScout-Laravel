@@ -2,10 +2,11 @@
 
 namespace App\Scraper;
 use App\Models\Serie;
+use App\Models\Chapter;
+use App\Models\Scanlator;
 use InvalidArgumentException;
 use Symfony\Component\BrowserKit\HttpBrowser;
 use App\Exceptions\SerieAlreadyPresentException;
-use App\Models\Scanlator;
 
 class AsuraScansScraper extends Scraper
 {
@@ -90,22 +91,24 @@ class AsuraScansScraper extends Scraper
                         'status' => $serieInfo['serieStatus'],
                         // $serieGenres => $serieInfo["serieGenres"],
                         ];
-                        $options=[
-                            'http'=>[
-                                'header'=>"Content-type: application/x-www-form-urlencoded\r\n",
-                                'method'=>'POST',
-                                'content'=>http_build_query($data),
-                            ]
-                            ];
-                            $context = stream_context_create($options);
-                            $result = file_get_contents("http://localhost:8000/series", false, $context);
-                            if ($result === false) {
-                                /* Handle error */
-                            }
 
-                            var_dump($result);
+                        // $options=[
+                        //     'http'=>[
+                        //         'header'=>"Content-type: application/x-www-form-urlencoded\r\n",
+                        //         'method'=>'POST',
+                        //         'content'=>http_build_query($data),
+                        //     ]
+                        //     ];
+                        //     $context = stream_context_create($options);
+                        //     $result = file_get_contents("http://localhost:8000/series", false, $context);
+                        //     if ($result === false) {
+                        //         /* Handle error */
+                        //     }
 
-                        $db=false;
+                        //     var_dump($result);
+
+                        $db=true;
+                        //!!!Right now the serie is being made here
                         if($db){
                             $scanlators=Scanlator::all();
                             $scanlator=null;
@@ -132,6 +135,9 @@ class AsuraScansScraper extends Scraper
                             $serie->scanlator()->associate($scanlator);
                             $serie->save();
                             $scanlator->save();
+
+                            //create chapters
+                            self::createChapters($chapterCrawler,$serie);
                         }
 
                         $sout=false;
@@ -155,103 +161,20 @@ class AsuraScansScraper extends Scraper
 
 
 
-                        //!!!Right now the serie is being made here, doesn't work yet because description is to long
+
 
 
 
                         echo ++$serieCounter."\n";
 
 
-                        //TO DO create serie
 
-                        //create chapters
-                        //self::createChapters($chapterCrawler);
-                        //sleep(10);
 
                     });
                 }
                 catch(InvalidArgumentException){
                     echo "node not found 1".$serieCounter;
                 }
-                // $serieList->each(function($node) use($client,$serieCounter) {
-                //     //add info of serie we can find on the seriesList page
-                //     $serieLink = $node->filter('div a')->attr('href');
-                //     $serieTitle = $node->filter('div a div.bigor div.tt')->text();
-                //     $serieCover = $node->filter('div a div.limit img')->attr('src');
-
-
-
-                //     //go to the specific serie
-                //     self::requestCooldown();
-                //     $chapterCrawler = $client->request('GET', $serieLink);
-
-                //     //add info of serie we can find on the serieSpecific page
-                //     $serieInfo = self::addExtraInfo($chapterCrawler);
-
-                //     $serieAuthor = $serieInfo['serieAuthor'];
-                //     $serieArtists = $serieInfo['serieArtists'];
-                //     $seriePublisher = $serieInfo['serieCompany'];
-                //     $serieType = $serieInfo['serieType'];
-                //     $serieSrc = $this->src;
-                //     // $serieDescription=$serieInfo['serieDescription'];
-                //     $serieStatus = $serieInfo['serieStatus'];
-                //     $serieGenres = $serieInfo["serieGenres"];
-
-                //     //$brotherSeries=self::validate($serieTitle,$serieSrc);
-
-                //     $scanlators=Scanlator::all();
-                //     $scanlator=null;
-                //     foreach($scanlators as $scan){
-                //         if($scan->name==$serieSrc){
-                //             $scanlator=$scan;
-                //         }
-                //     }
-                //     if($scanlator==null){
-                //         return "Scanlator not valid";
-                //     }
-
-
-
-                //     //!!!Right now the serie is being made here, doesn't work yet because description is to long
-                //     $serie=new Serie();
-
-                //     $serie->status=$serieStatus;
-                //     $serie->title=$serieTitle;
-                //     $serie->url=$serieLink;
-                //     $serie->cover=$serieCover;
-                //     $serie->src=$serieSrc;
-                //     $serie->author=$serieAuthor;
-                //     $serie->company=$seriePublisher;
-                //     $serie->artists=$serieArtists;
-                //     $serie->type=$serieType;
-                //     $serie->description=null;
-                //     $serie->scanlator()->associate($scanlator);
-
-                //     $serie->save();
-
-
-                //     // echo ++$serieCounter."\n";
-                //     // echo "\nLink=".$serieLink."\nTitle=".$serieTitle."\nCover=".$serieCover."\nType=".$serieType."\nStatus=".$serieStatus."\nDescription=".$serieDescription;
-                //     // foreach ($serieGenres as $s) {
-                //     //     if (is_string($s)) {
-                //     //         echo $s;
-                //     //     } else {
-                //     //         echo "\nGenres=";
-                //     //         foreach($s as $i){
-                //     //             echo $i."\n";
-                //     //         }
-                //     //     }
-                //     // };
-
-                //     // echo "\nAuthor=".$serieAuthor."\nArtists=".$serieArtists."\nPublisher=".$seriePublisher;
-
-                //     //TO DO create serie
-
-                //     //create chapters
-                //     //self::createChapters($chapterCrawler);
-                //     //sleep(10);
-
-                // });
             }
             $pageIndex++;
         }
@@ -259,12 +182,17 @@ class AsuraScansScraper extends Scraper
     }
 
     //Creates chapters but not yet implemented
-    protected static function createChapters($chapterCrawler) {
+    protected static function createChapters($chapterCrawler,$serie) {
         $chapterList = $chapterCrawler->filter('#chapterlist ul li');
-        $chapterList->each(function($node) {
-            $chapterName = $node->filter('div  div  a  span.chapternum')->text();
+        $chapterList->each(function($node) use($serie) {
+            $chapterTitle = $node->filter('div  div  a  span.chapternum')->text();
             $chapterUrl = $node->filter('a')->attr('href');
             //TO DO create chapter
+            $chapter= new Chapter();
+            $chapter->title=$chapterTitle;
+            $chapter->url=$chapterUrl;
+            $chapter->serie()->associate($serie);
+            $chapter->save();
         });
     }
 
@@ -305,7 +233,7 @@ class AsuraScansScraper extends Scraper
                         });
                     }
                 }catch(InvalidArgumentException){
-                    echo "node not found 3";
+                    echo "node not found: Genres";
                     $node->html();
                 }
 
