@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use SerieService;
+
+use App\Models\Serie;
 use App\Models\Scanlator;
 use Illuminate\Http\Request;
 
 class SerieController extends Controller
 {
-    protected $service;
 
     public function __construct()
     {
-        $this->service=new SerieService();;
+
     }
     /**
      * Display a listing of the resource.
@@ -25,9 +25,9 @@ class SerieController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create(Scanlator $scanlator)
+    public function create()
     {
-        $this->service->createSerie($scanlator);
+
     }
 
     /**
@@ -41,9 +41,9 @@ class SerieController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Serie $serie)
     {
-        //
+        return view('series.show',['serie'=>$serie]);
     }
 
     /**

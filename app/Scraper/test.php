@@ -1,5 +1,6 @@
 <?php
 
+use App\Scraper\Scraper2;
 use App\Scraper\AsuraScansScraper;
 use App\Scraper\FlameComicsScraper;
 use Symfony\Component\BrowserKit\HttpBrowser;

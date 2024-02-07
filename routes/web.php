@@ -26,6 +26,7 @@ use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\ScanlatorController;
 use App\Http\Controllers\ScraperController;
 
 Route::get('/', [HomeController::class, 'home'])->name('home2');
@@ -56,6 +57,10 @@ Route::name('praktischeInfo.')->prefix('praktischeInfo')->group(function(){
 });
 
 Route::get('/members', [HomeController::class, 'members'])->name('members');
+
+Route::resource('scanlator',ScanlatorController::class);
+
+Route::resource('series',SerieController::class);
 
 Route::resource('posts',PostController::class)
 ->except(['index'])

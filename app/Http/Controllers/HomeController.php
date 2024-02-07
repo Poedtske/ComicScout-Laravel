@@ -2,17 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Category;
-use Illuminate\Http\Request;
 use App\Models\Post;
 use App\Models\User;
+use App\Models\Category;
+use App\Models\Scanlator;
+use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
     //controller methods= actions
     public function home() {
         $posts=Post::all();
-        return view('home',['posts'=>$posts]);
+        $scanlators=Scanlator::all();
+        return view('home',['posts'=>$posts,'scanlators'=>$scanlators]);
     }
 
     public function faq() {

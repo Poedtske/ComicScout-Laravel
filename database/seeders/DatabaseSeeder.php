@@ -189,8 +189,8 @@ class DatabaseSeeder extends Seeder
 
         \App\Models\Scanlator::factory()->create([
             'name' => 'AsuraScans',
-            'url' => 'admin@ehb.be',
-            'logo'=>'Password!321',
+            'url' => 'https://asuratoon.com/',
+            'logo'=>'https://asuratoon.com/wp-content/uploads/2021/03/Group_1.png',
         ]);
 
 
