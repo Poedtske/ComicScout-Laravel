@@ -81,10 +81,31 @@ class AsuraScansScraper extends Scraper
                         $serieGenres = $serieInfo["serieGenres"];
 
                         //$brotherSeries=self::validate($serieTitle,$serieSrc);
+                        $data=[
+                            'author' => $serieInfo['serieAuthor'],
+                        'artists' => $serieInfo['serieArtists'],
+                        'publisher' => $serieInfo['serieCompany'],
+                        'type' => $serieInfo['serieType'],
+                        'src' => $this->src,
+                        'status' => $serieInfo['serieStatus'],
+                        // $serieGenres => $serieInfo["serieGenres"],
+                        ];
+                        $options=[
+                            'http'=>[
+                                'header'=>"Content-type: application/x-www-form-urlencoded\r\n",
+                                'method'=>'POST',
+                                'content'=>http_build_query($data),
+                            ]
+                            ];
+                            $context = stream_context_create($options);
+                            $result = file_get_contents("http://localhost:8000/series", false, $context);
+                            if ($result === false) {
+                                /* Handle error */
+                            }
 
+                            var_dump($result);
 
-
-                        $db=true;
+                        $db=false;
                         if($db){
                             $scanlators=Scanlator::all();
                             $scanlator=null;

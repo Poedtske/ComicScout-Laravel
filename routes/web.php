@@ -28,6 +28,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\ScanlatorController;
 use App\Http\Controllers\ScraperController;
+use Mockery\Generator\Parameter;
 
 Route::get('/', [HomeController::class, 'home'])->name('home2');
 
@@ -60,7 +61,9 @@ Route::get('/members', [HomeController::class, 'members'])->name('members');
 
 Route::resource('scanlator',ScanlatorController::class);
 
-Route::resource('series',SerieController::class);
+//Route::resource('series',SerieController::class)->parameters(['serie'=>'serie']);
+
+Route::get('scanlator/series/{serie}',[scanlatorController::class,'showSerie'])->name('scanlator.serie');
 
 Route::resource('posts',PostController::class)
 ->except(['index'])

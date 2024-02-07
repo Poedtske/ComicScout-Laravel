@@ -17,7 +17,7 @@
     @foreach ($scanlator->series as $serie)
 
             <div class="scanlatorFlex-Item">
-                <a href="{{ route('series.show',[$serie]) }}">
+                <a href="{{ route('scanlator.serie',[$serie]) }}">
                     <img src="{{ $serie->cover }}" alt="{{ $serie->title }}">
                 </a>
                 {{ $serie->title }}

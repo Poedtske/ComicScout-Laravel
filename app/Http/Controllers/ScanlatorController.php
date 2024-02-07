@@ -51,6 +51,10 @@ class ScanlatorController extends Controller
     {
         return view('scanlator.show',['scanlator'=>$scanlator]);
     }
+    public function showserie(Serie $serie)
+    {
+        return view('scanlator.showSerie',['serie'=>$serie]);
+    }
 
     /**
      * Show the form for editing the specified resource.

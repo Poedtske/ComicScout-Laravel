@@ -4,6 +4,7 @@ namespace App\Console;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use Illuminate\Routing\Middleware\SubstituteBindings;
 
 class Kernel extends ConsoleKernel
 {
