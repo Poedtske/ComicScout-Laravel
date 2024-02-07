@@ -56,24 +56,7 @@ class ScanlatorController extends Controller
     {
         return view('scanlator.showSerie',['serie'=>$serie]);
     }
-    public function bookmark(Serie $serie,User $user)
-{
-    // Check if the serie is already bookmarked by the user
-    $isBookmarked = $user->bookmarks()->where('serie_id', $serie->id)->exists();
 
-    if ($isBookmarked) {
-        // If the serie is already bookmarked, remove it
-        $user->bookmarks()->detach($serie);
-    } else {
-        // If the serie is not bookmarked, add it
-        $user->bookmarks()->attach($serie);
-    }
-
-    // Save the changes
-    $user->save();
-
-    return view('scanlator.showSerie',['serie'=>$serie]);
-}
 
 
     /**

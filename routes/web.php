@@ -61,10 +61,9 @@ Route::get('/members', [HomeController::class, 'members'])->name('members');
 
 Route::resource('scanlator',ScanlatorController::class);
 
-//Route::resource('series',SerieController::class)->parameters(['serie'=>'serie']);
-
-Route::get('scanlator/series/{serie}',[scanlatorController::class,'showSerie'])->name('scanlator.serie');
-Route::post('series/{serie}/users/{user}',[scanlatorController::class,'bookmark'])->name('serie.bookmark');
+Route::resource('series',SerieController::class)->except(['show']);
+Route::get('/series/{serie}',[SerieController::class,'show'])->name('serie.show');
+Route::post('series/{serie}/{user}',[SerieController::class,'bookmark'])->name('serie.bookmark');
 
 
 Route::resource('posts',PostController::class)
@@ -112,68 +111,3 @@ Route::get('/bookmarks', function(){
 
 require __DIR__.'/auth.php';
 
-//Auth::routes();
-
-//Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-// <?php
-
-// namespace App\Http\Controllers;
-
-// use Illuminate\Http\Request;
-// use Illuminate\Support\Facades\Hash;
-// use Illuminate\Support\Facades\Auth;
-// use App\Models\User;
-
-// class AuthController extends Controller
-// {
-//     public function register(Request $request){
-//         if($request->isMethod(('get'))){
-//             return view('auth.register');
-//         }
-
-//         $request->validate([
-//             'name'=>'required',
-//             'email'=>'required|email|unique:users',
-//             'password'=>'required|min:6',
-//         ]);
-
-//         User::create([
-//             'name'=>$request->input('name'),
-//             'email'=>$request->input('email'),
-//             'password'=>Hash::make($request->input('password')),
-//         ]);
-
-//         return redirect()
-//         ->route('login')
-//         ->with('success','Your account has been created! You can now login.');
-//     }
-//     public function login(Request $request){
-//         if($request->isMethod(('get'))){
-//             return view('auth.login');
-//         }
-
-//         $credentials=$request->validate([
-//             'email'=>'required',
-//             'password'=>'required',
-//         ]);
-
-//         if(Auth::attempt($credentials)){
-//             return redirect()
-//                 ->route('home2')
-//                 ->with('success','You have successfully logged in');
-//         }
-
-//         return redirect()
-//             ->route('login')
-//             ->withErrors('Provided login information is not valid');
-
-//     }
-//     public function logout(Request $request){
-//         Auth::logout();
-//         $request->session()->invalidate();
-//         $request->session()->regenerateToken();
-//         return redirect()
-//             ->route('home2')
-//             ->with('success','You have successfully logged out');
-//     }
-// }
