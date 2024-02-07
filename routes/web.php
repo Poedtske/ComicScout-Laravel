@@ -64,6 +64,8 @@ Route::resource('scanlator',ScanlatorController::class);
 //Route::resource('series',SerieController::class)->parameters(['serie'=>'serie']);
 
 Route::get('scanlator/series/{serie}',[scanlatorController::class,'showSerie'])->name('scanlator.serie');
+Route::post('series/{serie}/users/{user}',[scanlatorController::class,'bookmark'])->name('serie.bookmark');
+
 
 Route::resource('posts',PostController::class)
 ->except(['index'])

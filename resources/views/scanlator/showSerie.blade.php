@@ -28,11 +28,18 @@
             <p class="infoFlex-Item">Publisher: {{ $serie->company }}</p>
             <p class="infoFlex-Item">Type: {{ $serie->type }}</p>
             {{-- if user has it bookmarked --}}
+            {{-- Auth::user()->bookmarks()->where('serie_id', $serie->id)->exists() --}}
             @auth
-                @if (true)
-                    <button class="bookmarked">bookmarked</button>
+                @if (Auth::user()->bookmarks()->where('serie_id', $serie->id)->exists())
+                <form method="POST" action="{{ route('serie.bookmark',[$serie,Auth::user()]) }}">
+                    @csrf
+                    <button class="bookmarked" type="submit">bookmarked</button>
+                </form>
                 @else
-                    <button class="notBookmarked">bookmark</button>
+                <form method="POST" action="{{ route('serie.bookmark',[$serie,Auth::user()]) }}">
+                    @csrf
+                    <button class="notBookmarked" type="submit">bookmark</button>
+                </form>
                 @endif
             @endauth
         </div>
