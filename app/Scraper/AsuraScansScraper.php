@@ -358,7 +358,7 @@ class AsuraScansScraper extends Scraper
     private function checkScanlator(){
         $scanlator=Scanlator::where('name',$this->src)->first();
         if($scanlator===null){
-            throw new InvalidScanlatorException("This scanlator".$this->src."does not exist");
+            throw new InvalidScanlatorException("This scanlator:".$this->src." does not exist");
         }
         else{
             return $scanlator;

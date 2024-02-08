@@ -36,4 +36,9 @@ class Serie extends Model
     {
         return $this->belongsToMany(User::class);
     }
+
+    public function relatedSeries()
+    {
+        return $this->belongsToMany(Serie::class, 'serie_serie', 'parent_serie_id', 'child_serie_id');
+    }
 }

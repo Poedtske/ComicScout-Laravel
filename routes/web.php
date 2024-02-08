@@ -63,7 +63,7 @@ Route::resource('scanlator',ScanlatorController::class);
 
 Route::resource('series',SerieController::class)->except(['show']);
 Route::get('/series/{serie}',[SerieController::class,'show'])->name('serie.show');
-Route::post('series/{serie}/{user}',[SerieController::class,'bookmark'])->name('serie.bookmark');
+Route::post('series/{serie}/{user}',[SerieController::class,'bookmark'])->name('serie.bookmark')->middleware('auth');
 
 
 Route::resource('posts',PostController::class)
@@ -107,7 +107,7 @@ Route::post('/profile/pro{user_id}', [ProfileController::class, 'promote'])->nam
 Route::post('/profile/dem{user_id}', [ProfileController::class, 'demote'])->name('profile.demote')->middleware(['admin']);
 
 Route::get('/bookmarks', function(){
-    return view('profile.bookmarks');})->name('bookmarks');
+    return view('profile.bookmarks');})->name('bookmarks')->middleware('auth');
 
 require __DIR__.'/auth.php';
 

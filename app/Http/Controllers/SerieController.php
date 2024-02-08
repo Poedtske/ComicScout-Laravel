@@ -44,9 +44,11 @@ class SerieController extends Controller
      */
     public function show(Serie $serie)
     {
-        // $serie = Serie::find($serie);
-        return view('series.show',['serie'=>$serie]);
+        $sortedChapters = $serie->chapters->sortByDesc('title');
+
+        return view('series.show', ['serie' => $serie, 'chapters' => $sortedChapters]);
     }
+
     public function bookmark(Serie $serie,User $user)
     {
         // Check if the serie is already bookmarked by the user

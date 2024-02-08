@@ -47,7 +47,7 @@
   </section>
 
   <section style="background-color:grey;" class="chaptersFlex-Container">
-    @foreach ($serie->chapters as $chapter)
+    @foreach ($chapters as $chapter)
         <a href="{{ $chapter->url }}" class="chapterFlex-Item">
             <button>
                 {{ $chapter->title }} <br>
