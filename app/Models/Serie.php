@@ -14,6 +14,8 @@ class Serie extends Model
 
     protected $guarded=['id'];
 
+    // protected $primaryKey=['id','title'];
+
     public function scanlator():BelongsTo
     {
         return $this->belongsTo(Scanlator::class);

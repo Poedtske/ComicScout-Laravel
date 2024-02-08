@@ -11,13 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
+
+
         Schema::create('series', function (Blueprint $table) {
             $table->id();
             $table->string("status");
             $table->string("title");
             $table->string("url");
             $table->string("cover");
-            $table->string("src");
             $table->string("author")->nullable();
             $table->string("company")->nullable();
             $table->string("artists")->nullable();

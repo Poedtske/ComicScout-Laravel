@@ -5,6 +5,7 @@ use App\Models\Serie;
 use App\Models\Chapter;
 use App\Models\Scanlator;
 use InvalidArgumentException;
+use App\Exceptions\InvalidScanlatorException;
 use Symfony\Component\BrowserKit\HttpBrowser;
 use App\Exceptions\SerieAlreadyPresentException;
 
@@ -12,6 +13,8 @@ class AsuraScansScraper extends Scraper
 {
     protected $src="AsuraScans";
     protected $url='https://asuratoon.com/manga/?page=';
+    protected $data=[];
+
     public function __construct() {
         parent::__construct();
     }
@@ -62,7 +65,7 @@ class AsuraScansScraper extends Scraper
                         $serieLink = $node->filter('div a')->attr('href');
                         $serieTitle = $node->filter('div a div.bigor div.tt')->text();
                         $serieCover = $node->filter('div a div.limit img')->attr('src');
-
+                        $serieSrc = $this->src;
 
 
                         //go to the specific serie
@@ -70,94 +73,49 @@ class AsuraScansScraper extends Scraper
                         $chapterCrawler = $client->request('GET', $serieLink);
 
                         //add info of serie we can find on the serieSpecific page
-                        $serieInfo = self::addExtraInfo($chapterCrawler);
 
-                        $serieAuthor = $serieInfo['serieAuthor'];
-                        $serieArtists = $serieInfo['serieArtists'];
-                        $seriePublisher = $serieInfo['serieCompany'];
-                        $serieType = $serieInfo['serieType'];
-                        $serieSrc = $this->src;
-                        //$serieDescription=$serieInfo['serieDescription'];
-                        $serieStatus = $serieInfo['serieStatus'];
-                        $serieGenres = $serieInfo["serieGenres"];
+
+
 
                         //$brotherSeries=self::validate($serieTitle,$serieSrc);
-                        $data=[
-                            'author' => $serieInfo['serieAuthor'],
-                        'artists' => $serieInfo['serieArtists'],
-                        'publisher' => $serieInfo['serieCompany'],
-                        'type' => $serieInfo['serieType'],
-                        'src' => $this->src,
-                        'status' => $serieInfo['serieStatus'],
-                        // $serieGenres => $serieInfo["serieGenres"],
+                        $this->data=[
+                        'link'=>$serieLink,
+                        'title'=>$serieTitle,
+                        'cover'=>$serieCover,
                         ];
 
-                        // $options=[
-                        //     'http'=>[
-                        //         'header'=>"Content-type: application/x-www-form-urlencoded\r\n",
-                        //         'method'=>'POST',
-                        //         'content'=>http_build_query($data),
-                        //     ]
-                        //     ];
-                        //     $context = stream_context_create($options);
-                        //     $result = file_get_contents("http://localhost:8000/series", false, $context);
-                        //     if ($result === false) {
-                        //         /* Handle error */
-                        //     }
+                        // 'author' => $serieInfo['serieAuthor'],
+                        // 'artists' => $serieInfo['serieArtists'],
+                        // 'publisher' => $serieInfo['serieCompany'],
+                        // 'type' => $serieInfo['serieType'],
+                        // 'src' => $this->src,
+                        // 'status' => $serieInfo['serieStatus'],
 
-                        //     var_dump($result);
-
+                        //call function to create serie & its chapters
                         $db=true;
-                        //!!!Right now the serie is being made here
                         if($db){
-                            $scanlators=Scanlator::all();
-                            $scanlator=null;
-                            foreach($scanlators as $scan){
-                                if($scan->name==$serieSrc){
-                                    $scanlator=$scan;
-                                }
-                            }
-                            if($scanlator==null){
-                                return "Scanlator not valid";
-                            }
-                            $serie=new Serie();
+                            self::createSerie($chapterCrawler);
 
-                            $serie->status=$serieStatus;
-                            $serie->title=$serieTitle;
-                            $serie->url=$serieLink;
-                            $serie->cover=$serieCover;
-                            $serie->src=$serieSrc;
-                            $serie->author=$serieAuthor;
-                            $serie->company=$seriePublisher;
-                            $serie->artists=$serieArtists;
-                            $serie->type=$serieType;
-                            $serie->description=null;
-                            $serie->scanlator()->associate($scanlator);
-                            $serie->save();
-                            $scanlator->save();
-
-                            //create chapters
-                            self::createChapters($chapterCrawler,$serie);
                         }
 
-                        $sout=false;
-                        if($sout){
-                            echo "\nLink=".$serieLink."\nTitle=".$serieTitle."\nCover=".$serieCover."\nType=".$serieType."\nStatus=".$serieStatus
-                            //."\nDescription=".$serieDescription
-                            ;
-                            foreach ($serieGenres as $s) {
-                                if (is_string($s)) {
-                                    echo $s;
-                                } else {
-                                    echo "\nGenres=";
-                                    foreach($s as $i){
-                                        echo $i."\n";
-                                    }
-                                }
-                        };
+                        // $sout=false;
+                        // if($sout){
+                        //     echo "\nLink=".$serieLink."\nTitle=".$serieTitle."\nCover=".$serieCover."\nType=".$serieType."\nStatus=".$serieStatus
+                        //     //."\nDescription=".$serieDescription
+                        //     ;
+                        //     foreach ($serieGenres as $s) {
+                        //         if (is_string($s)) {
+                        //             echo $s;
+                        //         } else {
+                        //             echo "\nGenres=";
+                        //             foreach($s as $i){
+                        //                 echo $i."\n";
+                        //             }
+                        //         }
+                        // };
 
-                        echo "\nAuthor=".$serieAuthor."\nArtists=".$serieArtists."\nPublisher=".$seriePublisher;
-                        }
+                        // echo "\nAuthor=".$serieAuthor."\nArtists=".$serieArtists."\nPublisher=".$seriePublisher;
+                        // }
 
 
 
@@ -181,7 +139,7 @@ class AsuraScansScraper extends Scraper
 
     }
 
-    //Creates chapters but not yet implemented
+    //Creates chapters
     protected static function createChapters($chapterCrawler,$serie) {
         $chapterList = $chapterCrawler->filter('#chapterlist ul li');
         $chapterList->each(function($node) use($serie) {
@@ -321,60 +279,99 @@ class AsuraScansScraper extends Scraper
         return $infoSerie;
     }
 
-    //!!!Not implemented right now, starts the creation of the series
-    public function createSerie($serieTitle,$src){
-        $brotherSeries=self::validate($serieTitle,$src);
-        $scanlators=Scanlator::all();
-        $scanlator=null;
-        foreach($scanlators as $scan){
-            if($scan->name==$src){
-                $scanlator=$scan;
-            }
-        }
-        if($scanlator==null){
-            return "Scanlator not valid";
-        }
-        //$serie=Serie::create($request)->scanlator()->associate($scanlator);
 
-        //validated returns something similar as below
-        //$post=Post::create($validated);
-        //this is done by create, Mass Assignment
-        //$post=new Post();
-        //$post->title=$request->input('title');
-        //$post->description=$request->input('description');
-        //$post->save();
+    private function validateSerie($chapterCrawler){
+        try {
+            $scanlator=self::checkScanlator();
+        } catch (InvalidScanlatorException $e) {
+            echo "Error: " . $e->getMessage();
+            throw $e;
+        }
+        // $scanlator=Scanlator::where('name',$data['src'])->get();
+
+        try {
+            self::checkForDouble($this->data['title'],$scanlator);
+        } catch (SerieAlreadyPresentException $e) {
+            return ['allowed'=>false,
+            'scanlator'=>$scanlator];
+        }
+
+        $serieInfo = self::addExtraInfo($chapterCrawler);
+
+                        // $serieAuthor = $serieInfo['serieAuthor'];
+                        // $serieArtists = $serieInfo['serieArtists'];
+                        // $seriePublisher = $serieInfo['serieCompany'];
+                        // $serieType = $serieInfo['serieType'];
+
+                        // //$serieDescription=$serieInfo['serieDescription'];
+                        // $serieStatus = $serieInfo['serieStatus'];
+                        // $serieGenres = $serieInfo["serieGenres"];
+                        $this->data=array_merge($this->data,[
+                            'author' => $serieInfo['serieAuthor'],
+                            'artists' => $serieInfo['serieArtists'],
+                            'publisher' => $serieInfo['serieCompany'],
+                            'type' => $serieInfo['serieType'],
+                            'status' => $serieInfo['serieStatus'],
+                        ]);
+        return ['allowed'=>true,
+                'scanlator'=>$scanlator];
+
+
     }
 
-    //!!!Not implemented right now,checks for doubles and same serie in other scanlators
+    //Creates serie
+    public function createSerie($chapterCrawler){
+
+        $result=self::validateSerie($chapterCrawler);
+        $scanlator=$result['scanlator'];
+        $allowed=$result['allowed'];
+
+
+        // $existingSerieName = Serie::where('title', $data['title'])
+        // ->get();
+
+
+
+
+        if($allowed){
+            $serie=new Serie();
+
+            $serie->status=$this->data['status'];
+            $serie->title=$this->data['title'];
+            $serie->url=$this->data['link'];
+            $serie->cover=$this->data['cover'];
+            $serie->author=$this->data['author'];
+            $serie->company=$this->data['publisher'];
+            $serie->artists=$this->data['artists'];
+            $serie->type=$this->data['type'];
+            $serie->description=null;
+            $serie->scanlator()->associate($scanlator);
+            $serie->save();
+
+            //create chapters
+            self::createChapters($chapterCrawler,$serie);
+        }
+
+    }
+
+    //checks if the scanlator exists in the databank
+    private function checkScanlator(){
+        $scanlator=Scanlator::where('name',$this->src)->first();
+        if($scanlator===null){
+            throw new InvalidScanlatorException("This scanlator".$this->src."does not exist");
+        }
+        else{
+            return $scanlator;
+        }
+    }
+
+    //checks if there is a serie with the same name and scanlator
     private function checkForDouble($title,$scanlator){
-        $series=Serie::all();
-        $brotherSeries=[];
-        foreach($series as $serie){
-            if ($serie->title==$title&&$serie->scanlator_id=$scanlator){
-                // throw new Error();
-            }
-            else{
-                if($serie->title==$title)
-                $brotherSeries[]=$serie->id;
-            }
-        }
-        if(empty($brotherSeries)){
-            return false;
-        }
-        else{
-            return $brotherSeries;
-        }
-    }
-    //Not implemented right now, validation for serie
-    private function validate($serieTitle,$src){
-        $title=$serieTitle;
-        $scanlator=$src;
-        $brotherSeries=self::checkForDouble($title,$scanlator);
-        if($brotherSeries==false){
+        $existingSerie = Serie::where('title', $title)
+                            ->where('scanlator_id', $scanlator->id)
+                            ->first();
+        if($existingSerie){
             throw new SerieAlreadyPresentException("serie".$title."is already present in scanlator".$scanlator);
-        }
-        else{
-            return$brotherSeries;
         }
     }
 }
