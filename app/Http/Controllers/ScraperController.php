@@ -18,4 +18,14 @@ class ScraperController extends Controller
                 ->route('home2')
                 ->with('success');
     }
+
+    public function serieUpdater(){
+        $scanlators=Scanlator::all();
+        $ss=new ScraperService($scanlators);
+        $ss->updateSeries();
+
+        return redirect()
+                ->route('home2')
+                ->with('success');
+    }
 }

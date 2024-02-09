@@ -12,49 +12,61 @@
         <a href="{{ $scanlator->url }}" target="_blank" rel="noopener noreferrer"><h2>{{ $scanlator->name }}</h2></a>
     </div>
 </div> --}}
-<section style="background-color: black;">
-    <div class="serieFlex-Container">
-        <div class="serieFlex-Item">
-            <a href="{{ $serie->url }}">
-                <img src="{{ $serie->cover }}" alt="serie cover">
-            </a>
+<div class="gridContainer">
+    <section class=" gridItem" style="background-color: black;">
+        <div class="serieFlex-Container">
+            <div class="serieFlex-Item">
+                <a href="{{ $serie->url }}">
+                    <img src="{{ $serie->cover }}" alt="serie cover">
+                </a>
 
+            </div>
+            <div class="serieFlex-Item infoFlex-Container">
+                <p class="infoFlex-Item">Title: {{ $serie->title }}</p>
+                <p class="infoFlex-Item">Author: {{ $serie->author }}</p>
+                <p class="infoFlex-Item">Artists: {{ $serie->artists }}</p>
+                <p class="infoFlex-Item">Status : {{ $serie->status }}</p>
+                <p class="infoFlex-Item">Publisher: {{ $serie->company }}</p>
+                <p class="infoFlex-Item">Type: {{ $serie->type }}</p>
+                {{-- if user has it bookmarked --}}
+                {{-- Auth::user()->bookmarks()->where('serie_id', $serie->id)->exists() --}}
+                @auth
+                    @if (Auth::user()->bookmarks()->where('serie_id', $serie->id)->exists())
+                    <form method="POST" action="{{ route('serie.bookmark',[$serie,Auth::user()]) }}">
+                        @csrf
+                        <button class="bookmarked" type="submit">bookmarked</button>
+                    </form>
+                    @else
+                    <form method="POST" action="{{ route('serie.bookmark',[$serie,Auth::user()]) }}">
+                        @csrf
+                        <button class="notBookmarked" type="submit">bookmark</button>
+                    </form>
+                    @endif
+                @endauth
+            </div>
         </div>
-        <div class="serieFlex-Item infoFlex-Container">
-            <p class="infoFlex-Item">Title: {{ $serie->title }}</p>
-            <p class="infoFlex-Item">Author: {{ $serie->author }}</p>
-            <p class="infoFlex-Item">Artists: {{ $serie->artists }}</p>
-            <p class="infoFlex-Item">Status : {{ $serie->status }}</p>
-            <p class="infoFlex-Item">Publisher: {{ $serie->company }}</p>
-            <p class="infoFlex-Item">Type: {{ $serie->type }}</p>
-            {{-- if user has it bookmarked --}}
-            {{-- Auth::user()->bookmarks()->where('serie_id', $serie->id)->exists() --}}
-            @auth
-                @if (Auth::user()->bookmarks()->where('serie_id', $serie->id)->exists())
-                <form method="POST" action="{{ route('serie.bookmark',[$serie,Auth::user()]) }}">
-                    @csrf
-                    <button class="bookmarked" type="submit">bookmarked</button>
-                </form>
-                @else
-                <form method="POST" action="{{ route('serie.bookmark',[$serie,Auth::user()]) }}">
-                    @csrf
-                    <button class="notBookmarked" type="submit">bookmark</button>
-                </form>
-                @endif
-            @endauth
-        </div>
-    </div>
-  </section>
+      </section>
 
-  <section style="background-color:grey;" class="chaptersFlex-Container">
-    @foreach ($chapters as $chapter)
-        <a href="{{ $chapter->url }}" class="chapterFlex-Item">
+    <?php
+    // Sort the chapters collection by their id
+    $sortedChapters = $chapters->sortBy('id')->reverse();
+    ?>
+
+    <section class="chaptersFlex-Container gridItem">
+        @foreach ($sortedChapters as $chapter)
+        <div class="chapterFlex-Item">
+        <a href="{{ $chapter->url }}" target="_blank">
             <button>
                 {{ $chapter->title }} <br>
                 {{ date("d-m-y",strtotime($chapter->created_at)) }}
             </button>
         </a>
-    @endforeach
-</section>
+        </div>
+
+        @endforeach
+    </section>
+</div>
+
+
 
 @endsection

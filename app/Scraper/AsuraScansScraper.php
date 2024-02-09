@@ -8,15 +8,18 @@ use InvalidArgumentException;
 use App\Exceptions\InvalidScanlatorException;
 use Symfony\Component\BrowserKit\HttpBrowser;
 use App\Exceptions\SerieAlreadyPresentException;
+use App\Exceptions\ChapterAlreadyPresentException;
 
 class AsuraScansScraper extends Scraper
 {
     protected $src="AsuraScans";
     protected $url='https://asuratoon.com/manga/?page=';
-    protected $data=[];
+
+
 
     public function __construct() {
         parent::__construct();
+
     }
 
     /**
@@ -33,16 +36,15 @@ class AsuraScansScraper extends Scraper
      */
     public function chapterUpdater(){
 
+
     }
 /**
      * Checks  in database and in site and adds the newests if necessary
      */
-    public function serieUpdater(){
 
-    }
 
     public function run() {
-        $client = new HttpBrowser();
+
         $noSeries=false;
         $pageIndex=1;
         $serieCounter=0;
@@ -50,7 +52,7 @@ class AsuraScansScraper extends Scraper
             // //echo $this->requestCounter;
 
             //self::requestCooldown();
-            $pageCrawler = $client->request('GET', $this->url.strval($pageIndex));
+            $pageCrawler = $this->client->request('GET', $this->url.strval($pageIndex));
             $serieList = $pageCrawler->filter('div.listupd div.bs');
             try {
                     $serieList->text();
@@ -60,7 +62,7 @@ class AsuraScansScraper extends Scraper
                 }
             if(!$noSeries){
                 try{
-                    $serieList->each(function($node) use($client,&$serieCounter) {
+                    $serieList->each(function($node) use(&$serieCounter) {
                         //add info of serie we can find on the seriesList page
                         $serieLink = $node->filter('div a')->attr('href');
                         $serieTitle = $node->filter('div a div.bigor div.tt')->text();
@@ -70,7 +72,7 @@ class AsuraScansScraper extends Scraper
 
                         //go to the specific serie
                         //self::requestCooldown();
-                        $chapterCrawler = $client->request('GET', $serieLink);
+                        $chapterCrawler = $this->client->request('GET', $serieLink);
 
                         //add info of serie we can find on the serieSpecific page
 
@@ -94,7 +96,7 @@ class AsuraScansScraper extends Scraper
                         //call function to create serie & its chapters
                         $db=true;
                         if($db){
-                            self::createSerie($chapterCrawler);
+                            $this->createSerie($chapterCrawler);
 
                         }
 
@@ -139,22 +141,41 @@ class AsuraScansScraper extends Scraper
 
     }
 
-    //Creates chapters
-    protected static function createChapters($chapterCrawler,$serie) {
+
+
+    protected function createChapters($chapterCrawler,$serie) {
         $chapterList = $chapterCrawler->filter('#chapterlist ul li');
-        $chapterList->each(function($node) use($serie) {
+        $chapterArray=[];
+
+        $chapterList->each(function($node) use($serie,&$chapterArray) {
             $chapterTitle = $node->filter('div  div  a  span.chapternum')->text();
             $chapterUrl = $node->filter('a')->attr('href');
-            //TO DO create chapter
-            $chapter= new Chapter();
-            $chapter->title=$chapterTitle;
-            $chapter->url=$chapterUrl;
-            $chapter->serie()->associate($serie);
-            $chapter->save();
+            $chapter=['title'=>$chapterTitle,
+                'url'=>$chapterUrl,
+        ];
+        // echo $chapter['title'];
+
+            $allowed=self::validateChapter($chapterTitle,$serie);
+            if($allowed){
+                $chapterArray[]=$chapter;
+            }
+
+
         });
+        //echo count($chapterArray);
+        $chapterArray=array_reverse($chapterArray);
+        foreach ($chapterArray as $chap) {
+            $chapter= new Chapter();
+                $chapter->title=$chap['title'];
+                $chapter->url=$chap['url'];
+                $chapter->serie()->associate($serie);
+                $chapter->save();
+        };
+
+
     }
 
-    protected static function addExtraInfo($chapterCrawler) {
+    protected function addExtraInfo($chapterCrawler) {
         $infoSerie = [];
         //echo $chapterCrawler->html();
         $info = $chapterCrawler->filter('div.bixbox.animefull div.bigcontent div.thumbook div.rt div.tsinfo div.imptdt');
@@ -280,98 +301,5 @@ class AsuraScansScraper extends Scraper
     }
 
 
-    private function validateSerie($chapterCrawler){
-        try {
-            $scanlator=self::checkScanlator();
-        } catch (InvalidScanlatorException $e) {
-            echo "Error: " . $e->getMessage();
-            throw $e;
-        }
-        // $scanlator=Scanlator::where('name',$data['src'])->get();
 
-        try {
-            self::checkForDouble($this->data['title'],$scanlator);
-        } catch (SerieAlreadyPresentException $e) {
-            return ['allowed'=>false,
-            'scanlator'=>$scanlator];
-        }
-
-        $serieInfo = self::addExtraInfo($chapterCrawler);
-
-                        // $serieAuthor = $serieInfo['serieAuthor'];
-                        // $serieArtists = $serieInfo['serieArtists'];
-                        // $seriePublisher = $serieInfo['serieCompany'];
-                        // $serieType = $serieInfo['serieType'];
-
-                        // //$serieDescription=$serieInfo['serieDescription'];
-                        // $serieStatus = $serieInfo['serieStatus'];
-                        // $serieGenres = $serieInfo["serieGenres"];
-                        $this->data=array_merge($this->data,[
-                            'author' => $serieInfo['serieAuthor'],
-                            'artists' => $serieInfo['serieArtists'],
-                            'publisher' => $serieInfo['serieCompany'],
-                            'type' => $serieInfo['serieType'],
-                            'status' => $serieInfo['serieStatus'],
-                        ]);
-        return ['allowed'=>true,
-                'scanlator'=>$scanlator];
-
-
-    }
-
-    //Creates serie
-    public function createSerie($chapterCrawler){
-
-        $result=self::validateSerie($chapterCrawler);
-        $scanlator=$result['scanlator'];
-        $allowed=$result['allowed'];
-
-
-        // $existingSerieName = Serie::where('title', $data['title'])
-        // ->get();
-
-
-
-
-        if($allowed){
-            $serie=new Serie();
-
-            $serie->status=$this->data['status'];
-            $serie->title=$this->data['title'];
-            $serie->url=$this->data['link'];
-            $serie->cover=$this->data['cover'];
-            $serie->author=$this->data['author'];
-            $serie->company=$this->data['publisher'];
-            $serie->artists=$this->data['artists'];
-            $serie->type=$this->data['type'];
-            $serie->description=null;
-            $serie->scanlator()->associate($scanlator);
-            $serie->save();
-
-            //create chapters
-            self::createChapters($chapterCrawler,$serie);
-        }
-
-    }
-
-    //checks if the scanlator exists in the databank
-    private function checkScanlator(){
-        $scanlator=Scanlator::where('name',$this->src)->first();
-        if($scanlator===null){
-            throw new InvalidScanlatorException("This scanlator:".$this->src." does not exist");
-        }
-        else{
-            return $scanlator;
-        }
-    }
-
-    //checks if there is a serie with the same name and scanlator
-    private function checkForDouble($title,$scanlator){
-        $existingSerie = Serie::where('title', $title)
-                            ->where('scanlator_id', $scanlator->id)
-                            ->first();
-        if($existingSerie){
-            throw new SerieAlreadyPresentException("serie".$title."is already present in scanlator".$scanlator);
-        }
-    }
 }

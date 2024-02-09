@@ -25,11 +25,8 @@
       </section>
       <p>Todo:</p><br>
       <p>Scraper:</p>
-      <p>Check for doubles (name+source)</p>
-      <p>Update</p>
       <p>check and create genres</p>
       <p>Relations:</p>
-      <p>bookmark and unbookmark series</p>
       <p>Genres</p>
       <p>Scheduling:</p>
       <p>let the scraper work on a schedule</p>

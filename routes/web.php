@@ -43,6 +43,7 @@ Route::get('/jeugd',[HomeController::class, 'jeugd'])->name('jeugd');
 //Route::resource('series', SerieController::class);
 
 Route::get('/series/builder',[ScraperController::class,'Builder'])->name('builder');
+Route::get('/series/serieUpdate',[ScraperController::class,'serieUpdater'])->name('serie.update');
 
 Route::name('fanfare.')->prefix('fanfare')->group(function(){
     Route::get('/bestuur',[HomeController::class, 'bestuur'])->name('bestuur');

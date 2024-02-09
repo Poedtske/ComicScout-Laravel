@@ -38,5 +38,11 @@ class ScraperService
         }
     }
 
+    public function updateSeries(){
+        foreach ($this->scrapers as $scraper) {
+            $scraper->serieUpdater();
+        }
+    }
+
 
 }
