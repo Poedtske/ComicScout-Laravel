@@ -3,6 +3,7 @@ namespace App\Services;
 
 use App\Scraper\AsuraScansScraper;
 use App\Scraper\FlameComicsScraper;
+use App\Scraper\RizzComicScraper;
 
 class ScraperService
 {
@@ -20,10 +21,13 @@ class ScraperService
         $this->scanlators->each(function($scanlator){
             switch ($scanlator->name) {
                 case 'AsuraScans':
-                    $this->scrapers[]= new AsuraScansScraper();
+                    $this->scrapers[]= new AsuraScansScraper(true);
                     break;
                 case 'FlamesComics':
-                    //$this->scrapers[]= new FlameComicsScraper();
+                    $this->scrapers[]= new FlameComicsScraper(true);
+                    break;
+                case 'RizzComic':
+                    $this->scrapers[]=new RizzComicScraper(true);
                     break;
 
                 default:

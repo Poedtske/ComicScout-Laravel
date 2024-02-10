@@ -193,6 +193,30 @@ class DatabaseSeeder extends Seeder
             'logo'=>'https://asuratoon.com/wp-content/uploads/2021/03/Group_1.png',
         ]);
 
+        \App\Models\Scanlator::factory()->create([
+            'name' => 'FlamesComics',
+            'url' => 'https://flamecomics.com/',
+            'logo'=>"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT8ewC34iza5nEn2dXqk2xYtrLNzJ5tJ5Vy0Q&usqp=CAU",
+        ]);
+
+        \App\Models\Scanlator::factory()->create([
+            'name' => 'RizzComic',
+            'url' => 'https://rizzcomic.com/',
+            'logo'=>"https://rizzcomic.com/assets/images/default_pfp_mewo.webp",
+        ]);
+
+        \App\Models\Scanlator::factory()->create([
+            'name' => 'ReaperScans',
+            'url' => 'https://reaperscans.com/',
+            'logo'=>"images/logo's/ReaperScansLogo.png",
+        ]);
+
+        \App\Models\Scanlator::factory()->create([
+            'name' => 'DemonComics',
+            'url' => 'https://demoncomics.org/',
+            'logo'=>"https://demoncomics.org/img/logo.png",
+        ]);
+
 
 
 

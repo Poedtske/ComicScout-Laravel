@@ -13,14 +13,29 @@ use App\Exceptions\ChapterAlreadyPresentException;
 class AsuraScansScraper extends Scraper
 {
     protected $src="AsuraScans";
-    protected $url='https://asuratoon.com/manga/?page=';
 
 
+    //filters Constants
+    // Constants related to series
+    protected $seriesList = 'div.listupd div.bs';
+    protected $serieUrl = 'div a';
+    protected $serieTitle = 'div a div.bigor div.tt';
+    protected $serieCover = 'div a div.limit img';
+
+    // Constants related to URLs
+    protected $url = 'https://asuratoon.com/manga/?page=';
+
+    // Constants related to chapters
+    protected $chaptersList = '#chapterlist ul li';
+    protected $chapterTitle = 'div div a span.chapternum';
+    protected $chapterUrl = 'a';
 
     public function __construct() {
-        parent::__construct();
+        parent::__construct($this->db);
 
     }
+
+
 
     /**
      * Updates domain name of Scanlater if there is a need to change it
@@ -31,13 +46,6 @@ class AsuraScansScraper extends Scraper
 
 
 
-    /**
-     * Checks chapterAmount in a serie in database and in site and adds the newests if necessary
-     */
-    public function chapterUpdater(){
-
-
-    }
 /**
      * Checks  in database and in site and adds the newests if necessary
      */
@@ -51,9 +59,9 @@ class AsuraScansScraper extends Scraper
         while(!$noSeries){
             // //echo $this->requestCounter;
 
-            //self::requestCooldown();
+            self::requestCooldown();
             $pageCrawler = $this->client->request('GET', $this->url.strval($pageIndex));
-            $serieList = $pageCrawler->filter('div.listupd div.bs');
+            $serieList = $pageCrawler->filter($this->seriesList);
             try {
                     $serieList->text();
                 } catch (InvalidArgumentException) {
@@ -64,15 +72,15 @@ class AsuraScansScraper extends Scraper
                 try{
                     $serieList->each(function($node) use(&$serieCounter) {
                         //add info of serie we can find on the seriesList page
-                        $serieLink = $node->filter('div a')->attr('href');
-                        $serieTitle = $node->filter('div a div.bigor div.tt')->text();
-                        $serieCover = $node->filter('div a div.limit img')->attr('src');
+                        $serieUrl = $node->filter($this->serieUrl)->attr('href');
+                        $serieTitle = $node->filter($this->serieTitle)->text();
+                        $serieCover = $node->filter($this->serieCover)->attr('src');
                         $serieSrc = $this->src;
 
 
                         //go to the specific serie
-                        //self::requestCooldown();
-                        $chapterCrawler = $this->client->request('GET', $serieLink);
+                        self::requestCooldown();
+                        $chapterCrawler = $this->client->request('GET', $serieUrl);
 
                         //add info of serie we can find on the serieSpecific page
 
@@ -81,7 +89,7 @@ class AsuraScansScraper extends Scraper
 
                         //$brotherSeries=self::validate($serieTitle,$serieSrc);
                         $this->data=[
-                        'link'=>$serieLink,
+                        'url'=>$serieUrl,
                         'title'=>$serieTitle,
                         'cover'=>$serieCover,
                         ];
@@ -94,30 +102,8 @@ class AsuraScansScraper extends Scraper
                         // 'status' => $serieInfo['serieStatus'],
 
                         //call function to create serie & its chapters
-                        $db=true;
-                        if($db){
                             $this->createSerie($chapterCrawler);
 
-                        }
-
-                        // $sout=false;
-                        // if($sout){
-                        //     echo "\nLink=".$serieLink."\nTitle=".$serieTitle."\nCover=".$serieCover."\nType=".$serieType."\nStatus=".$serieStatus
-                        //     //."\nDescription=".$serieDescription
-                        //     ;
-                        //     foreach ($serieGenres as $s) {
-                        //         if (is_string($s)) {
-                        //             echo $s;
-                        //         } else {
-                        //             echo "\nGenres=";
-                        //             foreach($s as $i){
-                        //                 echo $i."\n";
-                        //             }
-                        //         }
-                        // };
-
-                        // echo "\nAuthor=".$serieAuthor."\nArtists=".$serieArtists."\nPublisher=".$seriePublisher;
-                        // }
 
 
 
@@ -143,44 +129,14 @@ class AsuraScansScraper extends Scraper
 
 
 
-    protected function createChapters($chapterCrawler,$serie) {
-        $chapterList = $chapterCrawler->filter('#chapterlist ul li');
-        $chapterArray=[];
 
-        $chapterList->each(function($node) use($serie,&$chapterArray) {
-            $chapterTitle = $node->filter('div  div  a  span.chapternum')->text();
-            $chapterUrl = $node->filter('a')->attr('href');
-            $chapter=['title'=>$chapterTitle,
-                'url'=>$chapterUrl,
-        ];
-        // echo $chapter['title'];
-
-            $allowed=self::validateChapter($chapterTitle,$serie);
-            if($allowed){
-                $chapterArray[]=$chapter;
-            }
-
-
-        });
-        //echo count($chapterArray);
-        $chapterArray=array_reverse($chapterArray);
-        foreach ($chapterArray as $chap) {
-            $chapter= new Chapter();
-                $chapter->title=$chap['title'];
-                $chapter->url=$chap['url'];
-                $chapter->serie()->associate($serie);
-                $chapter->save();
-        };
-
-
-    }
 
     protected function addExtraInfo($chapterCrawler) {
         $infoSerie = [];
         //echo $chapterCrawler->html();
         $info = $chapterCrawler->filter('div.bixbox.animefull div.bigcontent div.thumbook div.rt div.tsinfo div.imptdt');
         try{
-            $info->each(function($node,$index=1) use (&$infoSerie ) {
+            $info->each(function($node) use (&$infoSerie ) {
 
                 //echo $node->text();
                 if (strpos($node->text(), "Type") !== false) {

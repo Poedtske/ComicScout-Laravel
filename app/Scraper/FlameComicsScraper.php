@@ -1,14 +1,33 @@
 <?php
 
 namespace App\Scraper;
-use Symfony\Component\BrowserKit\HttpBrowser;
+use App\Models\Serie;
+use App\Models\Chapter;
+use App\Models\Scanlator;
 use InvalidArgumentException;
+use Symfony\Component\BrowserKit\HttpBrowser;
 
 class FlameComicsScraper extends Scraper{
 
-    public function __construct($url,$src) {
-        parent::__construct($url,$src);
-        echo $this->requestCounter;
+    protected $src="FlamesComics";
+    //filters Constants
+    // Constants related to series
+    protected $seriesList = '#content > div.wrapper > div.postbody > div.bixbox.seriesearch > div.mrgn > div.listupd > div.bs';
+    protected $serieUrl = 'div a';
+    protected $serieTitle = 'div a div.bigor div.tt';
+    protected $serieCover = 'div a div.limit img';
+
+    // Constants related to URLs
+    protected $url = "https://flamecomics.com/series/?page=";
+
+    // Constants related to chapters
+    protected $chaptersList = 'div.eplister ul li';
+    protected $chapterTitle = 'a div.chbox div.eph-num span.chapternum';
+    protected $chapterUrl = 'a';
+
+    public function __construct() {
+        parent::__construct($this->db);
+
     }
 
     /**
@@ -23,25 +42,20 @@ class FlameComicsScraper extends Scraper{
     /**
      * Checks chapterAmount in a serie in database and in site and adds the newests if necessary
      */
-    public function chapterUpdater(){
 
-    }
 /**
      * Checks  in database and in site and adds the newests if necessary
      */
-    public function serieUpdater(){
 
-    }
 
     public function run() {
-        $client = new HttpBrowser();
         $noSeries=false;
         $pageIndex=1;
         //$requestCounter=0;
         while(!$noSeries){
             self::requestCooldown();
-            $pageCrawler = $client->request('GET', $this->url.strval($pageIndex));
-            $serieList = $pageCrawler->filter('#content > div.wrapper > div.postbody > div.bixbox.seriesearch > div.mrgn > div.listupd > div.bs');
+            $pageCrawler = $this->client->request('GET', $this->url.strval($pageIndex));
+            $serieList = $pageCrawler->filter($this->seriesList);
             try {
                     $serieList->text();
                 } catch (InvalidArgumentException) {
@@ -49,16 +63,22 @@ class FlameComicsScraper extends Scraper{
                     echo "no series on this page";
                 }
             if(!$noSeries){
-                $serieList->each(function($node) use($client) {
+                $serieList->each(function($node) {
                     //add info of serie we can find on the seriesList page
-                    $serieLink = $node->filter('div a')->attr('href');
-                    $serieTitle = $node->filter('div a div.bigor div.tt')->text();
-                    $serieCover = $node->filter('div a div.limit img')->text();
+                    $serieUrl = $node->filter($this->serieUrl)->attr('href');
+                    $serieTitle = $node->filter($this->serieTitle)->text();
+                    $serieCover = $node->filter($this->serieCover)->attr('src');
                     $serieStatus = $node->filter('div a div.bigor div.extra-info div.imptdt div i')->text();
 
+                    $this->data=[
+                        'url'=>$serieUrl,
+                        'title'=>$serieTitle,
+                        'cover'=>$serieCover,
+                        'status'=>$serieStatus,
+                        ];
                     //go to the specific serie
                     self::requestCooldown();
-                    $chapterCrawler = $client->request('GET', $serieLink);
+                    $chapterCrawler = $this->client->request('GET', $serieUrl);
 
                     //add info of serie we can find on the serieSpecific page
                     $serieInfo = self::addExtraInfo($chapterCrawler);
@@ -71,30 +91,22 @@ class FlameComicsScraper extends Scraper{
                     //TO DO create serie
 
                     //create chapters
-                    self::createChapters($chapterCrawler);
+                    self::createSerie($chapterCrawler);
 
                 });
             }
             $pageIndex++;
         }
-
     }
 
-    protected static function createChapters($chapterCrawler) {
-        $chapterList = $chapterCrawler->filter('div.eplister ul li');
-        $chapterList->each(function($node) {
-            $chapterName = $node->filter('a div.chbox div.eph-num span.chapternum')->text();
-            $chapterUrl = $node->filter('a')->attr('href');
-            echo $chapterName;
-            echo $chapterUrl;
-        });
-    }
 
-    protected static function addExtraInfo($chapterCrawler) {
+
+
+    protected function addExtraInfo($chapterCrawler) {
         $info = $chapterCrawler->filter('div.main-info div.second-half div.left-side div div');
         $infoSerie = [];
         $index = 1;
-        $info->each(function($node) use (&$infoSerie, &$index, $chapterCrawler) {
+        $info->each(function($node) use (&$infoSerie, &$index) {
             switch ($index) {
                 case 1:
                     $infoSerie['serieType'] = $node->filter('i')->text();
@@ -120,8 +132,10 @@ class FlameComicsScraper extends Scraper{
         });
 
         // Adding genres to infoSerie array
-        $infoSerie['genres'] = $genresArray;
+        $infoSerie['serieGenres'] = $genresArray;
+        $infoSerie['serieStatus']=$this->data['status'];
 
         return $infoSerie;
     }
+
 }

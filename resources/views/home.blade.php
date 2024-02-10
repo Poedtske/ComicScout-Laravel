@@ -8,19 +8,27 @@
 
 @section('content')
 
-      <section style="background-color: gray;">
-
+      <section class="scanlatorsFlex-Container" style="background-color: black;">
         @foreach ($scanlators as $scanlator)
-            <div class="scanlatorsFlex-Container">
-                <div class="scanlatorFlex-Item">
-                    <a href="{{ route('scanlator.show',[$scanlator]) }}">
-                        <img src="{{ $scanlator->logo }}" alt="{{ $scanlator->name }}">
-                    </a>
-                    <span class="scanlatorFlex-P">
-                        {{ $scanlator->name }}
-                    </span>
-                </div>
+        @if ($scanlator->name=='ReaperScans')
+            <div class="scanlatorFlex-Item">
+                <a href="{{ route('scanlator.show',[$scanlator]) }}">
+                    <img src="{{ asset($scanlator->logo) }}" alt="{{ $scanlator->name }}">
+                </a>
             </div>
+        @elseif ($scanlator->name=='RizzComic')
+            <div class="scanlatorFlex-Item">
+                <a href="{{ route('scanlator.show',[$scanlator]) }}">
+                    <img src="{{ $scanlator->logo }}" alt="{{ $scanlator->name }}" style="border-radius:100%; background-color:rgb(36,123,115); border:solid rgb(20,111,68); margin-top:10px; height:auto; transform: scale(1.2);">
+                </a>
+            </div>
+        @else
+            <div class="scanlatorFlex-Item">
+                <a href="{{ route('scanlator.show',[$scanlator]) }}">
+                    <img src="{{ $scanlator->logo }}" alt="{{ $scanlator->name }}">
+                </a>
+            </div>
+        @endif
         @endforeach
       </section>
       <p>Todo:</p><br>
