@@ -56,8 +56,6 @@
                 <p class="infoFlex-Item">Status : {{ $serie->status }}</p>
                 <p class="infoFlex-Item">Publisher: {{ $serie->company }}</p>
                 <p class="infoFlex-Item">Type: {{ $serie->type }}</p>
-                {{-- if user has it bookmarked --}}
-                {{-- Auth::user()->bookmarks()->where('serie_id', $serie->id)->exists() --}}
                 @auth
                     @if (Auth::user()->bookmarks()->where('serie_id', $serie->id)->exists())
                     <form method="POST" action="{{ route('serie.bookmark',[$serie,Auth::user()]) }}">

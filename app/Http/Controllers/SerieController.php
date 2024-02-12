@@ -57,9 +57,17 @@ class SerieController extends Controller
         if ($isBookmarked) {
             // If the serie is already bookmarked, remove it
             $user->bookmarks()->detach($serie);
+            $relatedSeries=$serie->relatedSeries()->get();
+            foreach ($relatedSeries as $relatedSerie) {
+                $user->bookmarks()->detach($relatedSerie);
+            }
         } else {
             // If the serie is not bookmarked, add it
             $user->bookmarks()->attach($serie);
+            $relatedSeries=$serie->relatedSeries()->get();
+            foreach ($relatedSeries as $relatedSerie) {
+                $user->bookmarks()->attach($relatedSerie);
+            }
         }
 
         // Save the changes
