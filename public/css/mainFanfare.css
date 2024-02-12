@@ -253,10 +253,11 @@ header nav .dropdown .dropbtn {
     background: none;
     transition: 0.3s;
 }
-/* header nav .dropdown .dropbtn:hover {
-    background: grey;
+header nav .dropdown .dropbtn:hover {
+    /* background: grey; */
+
     transition: 0.3s;
-} */
+}
 
 header nav .dropdown .dropdown-content {
     display: none;
@@ -391,6 +392,10 @@ footer button {
     border: none;
     margin-top: auto;
     margin-bottom: auto;
+    transition: 0.3s;
+}
+
+a{
     transition: 0.3s;
 }
 

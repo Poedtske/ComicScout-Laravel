@@ -16,7 +16,7 @@ abstract class Scraper implements IScraper
     // protected static $serieCounter=0;//total series scraped
 
     protected $src;//src name of scraper
-    protected const REQUEST_MAX_BEFORE_COOLDOWN=10;//max amount of requests before cooldown
+    protected $requestMaxBeforeCooldown=10;//max amount of requests before cooldown
     protected $requestCounter;//counts requests before cooldown
     protected $cooldownCounter=0;//counts cooldown
     protected $client;//for scraping
@@ -69,15 +69,20 @@ abstract class Scraper implements IScraper
 
     public function serieUpdater(){
         $scanlator=Scanlator::where("name",$this->src)->first();
-        Serie::where('scanlator_id',$scanlator->id)->get()->where('status','Ongoing')->each(function($serie){
-            self::requestCooldown();
-            $chapterCrawler=$this->client->request('GET', $serie->url);
-            if(count($chapterCrawler->filter($this->chaptersList))==count($serie->chapters)){
-                return;
+        Serie::where('scanlator_id', $scanlator->id)->get()->each(function ($serie) {
+            // Check if the status is either "ongoing" or "Ongoing"
+            if (strcasecmp(trim(strtolower($serie->status)), 'ongoing') === 0 || strcasecmp(trim(strtolower($serie->status)), 'unknown') === 0) {
+                self::requestCooldown();
+                $chapterCrawler = $this->client->request('GET', $serie->url);
+
+                // Compare the count of chapters on the website with the count of chapters stored in the database
+                if (count($chapterCrawler->filter($this->chaptersList)) == count($serie->chapters)) {
+                    return;
+                } else {
+                    self::createChapters($chapterCrawler, $serie);
+                }
             }
-            else{
-                self::createChapters($chapterCrawler,$serie);
-            }
+
         });
     }
 
@@ -88,7 +93,7 @@ abstract class Scraper implements IScraper
     {
 
         //echo $this->requestCounter;
-        if($this->requestCounter>=self::REQUEST_MAX_BEFORE_COOLDOWN){
+        if($this->requestCounter>=$this->requestMaxBeforeCooldown){
             //echo 'going to sleep';
             $this->cooldownCounter++;
             // echo $this->counter;
@@ -168,36 +173,49 @@ abstract class Scraper implements IScraper
             $info=$this->addExtraInfo($chapterCrawler);
             echo self::toString($info);
         }
-        // if($this->db===true){
-            $result=self::validateSerie($chapterCrawler);
-            $scanlator=$result['scanlator'];
-            $allowed=$result['allowed'];
+        $result=self::validateSerie($chapterCrawler);
+        $scanlator=$result['scanlator'];
+        $allowed=$result['allowed'];
 
-            if($allowed){
-                $serie=new Serie();
+        if($allowed){
+            $serie=new Serie();
 
-                $serie->status=$this->data['status'];
-                $serie->title=$this->data['title'];
-                $serie->url=$this->data['url'];
-                $serie->cover=$this->data['cover'];
-                $serie->author=$this->data['author'];
-                $serie->company=$this->data['publisher'];
-                $serie->artists=$this->data['artists'];
-                $serie->type=$this->data['type'];
-                $serie->description=null;
-                $serie->scanlator()->associate($scanlator);
-                $serie->save();
-                // echo "globalSerieCounter: ".++$this->serieCounter."\n";
-                //create chapters
-                $this->createChapters($chapterCrawler,$serie);
-            }
-        // }
+            $serie->status=$this->data['status'];
+            $serie->title=$this->data['title'];
+            $serie->url=$this->data['url'];
+            $serie->cover=$this->data['cover'];
+            $serie->author=$this->data['author'];
+            $serie->company=$this->data['publisher'];
+            $serie->artists=$this->data['artists'];
+            $serie->type=$this->data['type'];
+            $serie->description=null;
+            $serie->scanlator()->associate($scanlator);
+            $serie->save();
+            $this->checkBrotherSeries($serie);
+            // echo "globalSerieCounter: ".++$this->serieCounter."\n";
+            //create chapters
 
 
 
-
-
+            $this->createChapters($chapterCrawler,$serie);
+        }
     }
+
+    protected function checkBrotherSeries($serie)
+    {
+        $brotherSeries = Serie::whereRaw('LOWER(TRIM(title)) = ?', [strtolower(trim($serie->title))])
+                            ->where('scanlator_id', '!=', $serie->scanlator_id)
+                            ->get();
+
+        $brotherSeries->each(function ($brother) use ($serie) {
+            // Associate $brother with $serie here
+            // For example:
+            $brother->relatedSeries()->attach($serie->id);
+            $serie->relatedSeries()->attach($brother->id);
+        });
+    }
+
+
 
     protected function toString($array){
         $this->data['author']=$array['serieAuthor'];
@@ -207,7 +225,7 @@ abstract class Scraper implements IScraper
         $this->data['status']=$array['serieStatus'];
 
 
-        return "Author: " . $this->data['author'] . "\n" .
+        return "\n\nAuthor: " . $this->data['author'] . "\n" .
         "Artists: " . $this->data['artists'] . "\n" .
         "Publisher: " . $this->data['publisher'] . "\n" .
         "Type: " . $this->data['type'] . "\n" .

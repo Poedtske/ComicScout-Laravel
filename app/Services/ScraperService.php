@@ -1,9 +1,12 @@
 <?php
 namespace App\Services;
 
-use App\Scraper\AsuraScansScraper;
-use App\Scraper\FlameComicsScraper;
 use App\Scraper\RizzComicScraper;
+use App\Scraper\AsuraScansScraper;
+use App\Scraper\ResetScansScraper;
+use App\Scraper\DemonComicsScraper;
+use App\Scraper\FlameComicsScraper;
+use App\Scraper\ReaperScansScraper;
 
 class ScraperService
 {
@@ -29,7 +32,15 @@ class ScraperService
                 case 'RizzComic':
                     $this->scrapers[]=new RizzComicScraper(true);
                     break;
-
+                case 'DemonComics':
+                    $this->scrapers[]=new DemonComicsScraper(true);
+                    break;
+                case 'ReaperScans':
+                    $this->scrapers[]=new ReaperScansScraper(true);
+                    break;
+                case 'ResetScans':
+                    $this->scrapers[]=new ResetScansScraper(true);
+                    break;
                 default:
                     return "Scraper does not exist";
                     break;

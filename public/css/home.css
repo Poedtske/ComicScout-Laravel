@@ -120,11 +120,11 @@ main section p {
     width: 100%;
 }
 
-main section img {
+/* main section img {
     display: flexbox;
     margin-left: auto;
     margin-right: auto;
-}
+} */
 
 main :is(a, button):hover {
     scale: 1.15;
@@ -152,7 +152,7 @@ main button {
 
 .scanlatorsFlex-Container {
     display: flex;
-    padding-inline: 2rem;
+    /* padding-inline: 2rem; */
     text-align: center;
     justify-content: center;
     flex-wrap: wrap;
@@ -162,12 +162,27 @@ main button {
 .scanlatorFlex-Item {
     width: 50%;
     padding: 1em;
-    max-width: 250px;
+    max-width: 225px;
+    align-items: baseline;
+    /* Added transition property */
 }
+
 .scanlatorFlex-Item span {
     text-align: center;
     width: 150%;
-
     font-size: 150%;
     padding-inline: 0;
+}
+
+.scanlatorFlex-Item a:hover,
+.scanlatorFlex-Item img:hover {
+    transform: scale(1.15);
+}
+
+.scanlatorFlex-Item a img {
+    transition: transform 0.3s;
+}
+
+.scanlatorFlex-Item a {
+    justify-content: space-around;
 }

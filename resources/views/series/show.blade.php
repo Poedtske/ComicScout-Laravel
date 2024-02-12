@@ -12,6 +12,34 @@
         <a href="{{ $scanlator->url }}" target="_blank" rel="noopener noreferrer"><h2>{{ $scanlator->name }}</h2></a>
     </div>
 </div> --}}
+
+{{-- class="{{request()->routeIs('register') ? 'active' : ''}}" --}}
+<section class="scanlatorsFlex-Container">
+    @if ($serie->scanlator->name == 'ReaperScans')
+        <div class="scanlatorFlex-Item thisScanlator">
+            <a href="{{ $serie->scanlator->url }}" target="_blank" rel="noopener noreferrer"><img src="{{ asset($serie->scanlator->logo) }}" alt="{{ $serie->scanlator->name }}"></a>
+        </div>
+    @else
+        <div class="scanlatorFlex-Item thisScanlator">
+            <a href="{{ $serie->scanlator->url }}" target="_blank" rel="noopener noreferrer"><img src="{{ $serie->scanlator->logo }}" alt="{{ $serie->scanlator->name }}"></a>
+        </div>
+    @endif
+
+    @foreach ($serie->relatedSeries as $relatedSerie)
+        @if ($relatedSerie->scanlator->name == 'ReaperScans')
+            <div class="scanlatorFlex-Item">
+                <a href="{{ route('serie.show',[$relatedSerie]) }}" rel="noopener noreferrer"><img src="{{ asset($relatedSerie->scanlator->logo) }}" alt="{{ $relatedSerie->scanlator->name }}"></a>
+            </div>
+        @else
+            <div class="scanlatorFlex-Item">
+                <a href="{{ route('serie.show',[$relatedSerie]) }}" rel="noopener noreferrer"><img src="{{ $relatedSerie->scanlator->logo }}" alt="{{ $relatedSerie->scanlator->name }}"></a>
+            </div>
+        @endif
+    @endforeach
+</section>
+
+
+
 <div class="gridContainer">
     <section class=" gridItem" style="background-color: black;">
         <div class="serieFlex-Container">

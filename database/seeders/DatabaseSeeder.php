@@ -217,6 +217,12 @@ class DatabaseSeeder extends Seeder
             'logo'=>"https://demoncomics.org/img/logo.png",
         ]);
 
+        \App\Models\Scanlator::factory()->create([
+            'name' => 'ResetScans',
+            'url' => 'https://reset-scans.us/',
+            'logo'=>"https://reset-scans.us/wp-content/uploads/2017/10/Reset_Site_Logo.jpg",
+        ]);
+
 
 
 
