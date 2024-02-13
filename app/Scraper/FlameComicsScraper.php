@@ -8,19 +8,19 @@ use InvalidArgumentException;
 use Symfony\Component\BrowserKit\HttpBrowser;
 
 class FlameComicsScraper extends Scraper{
-
+//name of the source where the Scraper scrapes from
     protected $src="FlamesComics";
     //filters Constants
-    // Constants related to series
+    //Selectors related to series
     protected $seriesList = '#content > div.wrapper > div.postbody > div.bixbox.seriesearch > div.mrgn > div.listupd > div.bs';
     protected $serieUrl = 'div a';
     protected $serieTitle = 'div a div.bigor div.tt';
     protected $serieCover = 'div a div.limit img';
 
-    // Constants related to URLs
+    // Selector related to URLs
     protected $url = "https://flamecomics.com/series/?page=";
 
-    // Constants related to chapters
+    // Selectorss related to chapters
     protected $chaptersList = 'div.eplister ul li';
     protected $chapterTitle = 'a div.chbox div.eph-num span.chapternum';
     protected $chapterUrl = 'a';
@@ -39,15 +39,11 @@ class FlameComicsScraper extends Scraper{
 
 
 
+
+
     /**
-     * Checks chapterAmount in a serie in database and in site and adds the newests if necessary
+     * starts the process of scraping the series and chapters and adding them to the database
      */
-
-/**
-     * Checks  in database and in site and adds the newests if necessary
-     */
-
-
     public function run() {
         $noSeries=false;
         $pageIndex=1;
@@ -101,7 +97,9 @@ class FlameComicsScraper extends Scraper{
 
 
 
-
+    /**
+     * adds extra info, is specific to the site
+     */
     protected function addExtraInfo($chapterCrawler) {
         $info = $chapterCrawler->filter('div.main-info div.second-half div.left-side div div');
         $infoSerie = [];

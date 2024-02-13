@@ -6,18 +6,19 @@ use InvalidArgumentException;
 
 class DemonComicsScraper extends Scraper
 {
+    //Name of the source the scraper scrapes from
     protected $src="DemonComics";
     //filters Constants
-    // Constants related to series
+    //Selectors related to series
     protected $seriesList = '#index section:nth-child(6) div.section-body.boxsizing ul li';
     protected $serieUrl = 'a';
     protected $serieTitle = 'a h4';
     protected $serieCover = 'a figure img';
 
-    // Constants related to URLs
+    //Selector related to URLs
     protected $url = "https://demoncomics.org";
 
-    // Constants related to chapters
+    //Selectors related to chapters
     protected $chaptersList = '#chpagedlist ul li';
     protected $chapterTitle = 'a strong';
     protected $chapterUrl = 'a';
@@ -26,10 +27,18 @@ class DemonComicsScraper extends Scraper
         parent::__construct($this->db);
 
     }
+
+    /**
+     * Updates domain name of Scanlater if there is a need to change it
+     */
     public function updateDomain($newDomainName)
     {
 
     }
+
+    /**
+     * starts the process of scraping the series and chapters and adding them to the database
+     */
     public function run() {
 
         $noSeries=false;
@@ -101,6 +110,9 @@ class DemonComicsScraper extends Scraper
 
     }
 
+    /**
+     * adds extra info, is specific to the site
+     */
     protected function addExtraInfo($chapterCrawler) {
         $info = $chapterCrawler->filter('#mangainfo div div');
         $infoSerie = [];
@@ -122,12 +134,12 @@ class DemonComicsScraper extends Scraper
         // });
         try{
             // Extract author information
-    $authorInfo = $chapterCrawler->filter('#mangainfo div div.author span')->eq(1)->text();
-    $infoSerie["serieAuthor"] = $authorInfo;
+        $authorInfo = $chapterCrawler->filter('#mangainfo div div.author span')->eq(1)->text();
+        $infoSerie["serieAuthor"] = $authorInfo;
 
-    // Extract status information
-    $statusInfo = $chapterCrawler->filter('#mangainfo div div.header-stats span')->eq(2)->filter('strong')->text();
-    $infoSerie["serieStatus"] = $statusInfo;
+        // Extract status information
+        $statusInfo = $chapterCrawler->filter('#mangainfo div div.header-stats span')->eq(2)->filter('strong')->text();
+        $infoSerie["serieStatus"] = $statusInfo;
         }
         catch(InvalidArgumentException){
             echo "info not found";
@@ -150,6 +162,10 @@ class DemonComicsScraper extends Scraper
         return $infoSerie;
     }
 
+    /**
+     * is process to add chapters, uses methodhiding to override the one of the parent class
+     * is used because the website needed an unique approach
+     */
     protected function createChapters($chapterCrawler,$serie) {
         $chapterList = $chapterCrawler->filter($this->chaptersList);
         $chapterArray=[];

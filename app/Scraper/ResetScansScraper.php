@@ -6,23 +6,20 @@ use InvalidArgumentException;
 
 class ResetScansScraper extends Scraper
 {
+    //name of the source where the Scraper scrapes from
     protected $src="ResetScans";
-    //filters Constants
-    // Constants related to series
-    protected $seriesList = 'body div.wrap div div.site-content div.c-page-content.style-1 div div div div div.main-col-inner div div.c-page__content div.tab-content-wrap div div div.page-listing-item';
-    protected $extraLoop='div div';
-    // 'body > div.wrap > div > div.site-content > div.c-page-content.style-1 > div > div > div > div > div.main-col-inner > div > div.c-page__content > div.tab-content-wrap > div > div > div:nth-child(1) > div > div:nth-child(1)'
-    //'body > div.wrap > div > div.site-content > div.c-page-content.style-1 > div > div > div > div > div.main-col-inner > div > div.c-page__content > div.tab-content-wrap > div > div > div:nth-child(1) > div > div:nth-child(2) > div > div.item-summary > div.post-title.font-title > h3 > a'
-    // 'body > div.wrap > div > div.site-content > div.c-page-content.style-1 > div > div > div > div > div.main-col-inner > div > div.c-page__content > div.tab-content-wrap > div > div > div:nth-child(2)'
 
+    //Selectors related to series
+    protected $seriesList = 'body div.wrap div div.site-content div.c-page-content.style-1 div div div div div.main-col-inner div div.c-page__content div.tab-content-wrap div div div.page-listing-item';
+    protected $extraLoop='div div';//extra loop needed to scrape series
     protected $serieUrl = 'div div.item-summary div.post-title.font-title h3 a';
     protected $serieTitle = 'div div.item-summary div.post-title.font-title h3 a';
     protected $serieCover = 'div div.item-thumb a img';
 
-    // Constants related to URLs
+    //Selector related to URLs
     protected $url = "https://reset-scans.us/mangas/page/";
 
-    // Constants related to chapters
+    //Selectors related to chapters
     protected $chaptersList = '#manga-chapters-holder div.page-content-listing.single-page div ul li';
     protected $chapterTitle = 'div.li__text a';
     protected $chapterUrl = 'div.li__text a';
@@ -39,17 +36,9 @@ class ResetScansScraper extends Scraper
 
     }
 
-
-
     /**
-     * Checks chapterAmount in a serie in database and in site and adds the newests if necessary
+     * starts the process of scraping the series and chapters and adding them to the database
      */
-
-/**
-     * Checks  in database and in site and adds the newests if necessary
-     */
-
-
     public function run() {
         $noSeries=false;
         $pageIndex=1;
@@ -109,7 +98,9 @@ class ResetScansScraper extends Scraper
 
 
 
-
+    /**
+     * adds extra info, is specific to the site
+     */
     protected function addExtraInfo($chapterCrawler) {
         $info = $chapterCrawler->filter('#nav-info div div.post-content div.post-content_item');
         $infoSerie = [];

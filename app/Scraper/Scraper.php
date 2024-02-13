@@ -23,24 +23,31 @@ abstract class Scraper implements IScraper
     protected $data=[];//stores all info needed to make chapters and series
 
     //series selectors
-    protected $seriesList;
-    protected $serieUrl;
-    protected $serieTitle;
-    protected $serieCover;
+    protected $seriesList;//selector for the serie list
+    protected $serieUrl;//selector for the url of the serie page
+    protected $serieTitle;//selector for the title of the serie
+    protected $serieCover;//selector for the cover of the serie
 
     //chapter selectors
-    protected $chaptersList;
-    protected $chapterTitle;
-    protected $chapterUrl;
+    protected $chaptersList;//selector for the chapter list
+    protected $chapterTitle;//selector for the chapter title
+    protected $chapterUrl;//selector for the chapter url
 
-    protected $db;
+    protected $db;//true: no cout|yes database; false yes cout|no database
 
-
+    /**
+     * check if database is needed (for testing)
+     * will create a client
+     */
     public function __construct($db) {
         $this->client = new HttpBrowser();
         $this->db=$db;
     }
 
+    /**
+     * collects chapters and add them in an array, then reverses the array and start making the chapters and associating it with the serie
+     * this way the latest chapter will also have the highest id-number, this makes it easier to display by sorting on id
+     */
     protected function createChapters($chapterCrawler,$serie) {
         $chapterList = $chapterCrawler->filter($this->chaptersList);
         $chapterArray=[];
@@ -67,6 +74,9 @@ abstract class Scraper implements IScraper
         };
     }
 
+    /**
+     * is used to update the current series, will take the series with status that are ongoing or unknown, check their page of the ammount of chapters an compare it with the ones in the serie
+     */
     public function serieUpdater(){
         $scanlator=Scanlator::where("name",$this->src)->first();
         Serie::where('scanlator_id', $scanlator->id)->get()->each(function ($serie) {
@@ -86,9 +96,15 @@ abstract class Scraper implements IScraper
         });
     }
 
+    /**
+     * will add extra info like: status, author, type, artists
+     * depends heavily from site to site so will be made in child
+     */
     protected abstract function addExtraInfo($chapterCrawler);
 
-
+    /**
+     * to prevent sending to much requests and being blocked from a site we can only send max 20 request/min, it changes to 4 requests/min with reaper scans(localy declared)
+     */
     public function requestCooldown()
     {
 
@@ -106,7 +122,9 @@ abstract class Scraper implements IScraper
     }
 
 
-
+    /**
+     * This checks if a chapter is already present in the serie
+     */
     public static function checkForDoubleChapter($title,$serie){
         $existingSerie = Chapter::where('title', $title)
                                 ->where('serie_id',$serie->id)
@@ -116,6 +134,10 @@ abstract class Scraper implements IScraper
         }
     }
 
+    /**
+     * is the function called to start the validation of a chapter,
+     * calls checkForDoubleChapter and handels error
+     */
     public static function validateChapter($title,$serie){
         try {
             self::checkForDoubleChapter($title,$serie);
@@ -126,6 +148,13 @@ abstract class Scraper implements IScraper
         return true;
     }
 
+    /**
+     * is the function called to start the validation of a serie,
+     * calls checkScanlator to check if the scanlator exists
+     * calls checkForDoubleSerie to check if to serie to be made is already present by checking the title and scanlator
+     * when the information passed the checks it will call addExtraInfo to add the available info
+     *
+     */
     private function validateSerie($chapterCrawler){
         try {
             $scanlator=self::checkScanlator();
@@ -165,7 +194,11 @@ abstract class Scraper implements IScraper
 
     }
 
-    //Creates serie
+    /**
+     * creates serie after calling validateSerie to check if it is allowed to make the serie
+     * after making the serie and associating it with the correct scanlator it will call checkBrotherSeries to look for related series
+     * after this it will call createChapters to add the chapters
+     */
     public function createSerie($chapterCrawler){
 
         if($this->db==false){
@@ -201,6 +234,9 @@ abstract class Scraper implements IScraper
         }
     }
 
+    /**
+     * will add related series with the same title and associate them both ways
+     */
     protected function checkBrotherSeries($serie)
     {
         $brotherSeries = Serie::whereRaw('LOWER(TRIM(title)) = ?', [strtolower(trim($serie->title))])
@@ -216,7 +252,9 @@ abstract class Scraper implements IScraper
     }
 
 
-
+    /**
+     * is used for testing, prints out all fields of a serie
+     */
     protected function toString($array){
         $this->data['author']=$array['serieAuthor'];
         $this->data['artists']=$array['serieArtists'];

@@ -6,23 +6,24 @@ use InvalidArgumentException;
 
 class ReaperScansScraper extends Scraper
 {
+    //name of the source where the Scraper scrapes from
     protected $src="ReaperScans";
     //filters Constants
-    // Constants related to series
+    //Selectors related to series
     protected $seriesList = 'body div.flex.flex-col.h-screen.justify-between main div div div div.mt-6.grid.grid-cols-2.gap-4 li';
     protected $serieUrl = 'div  a.relative.transition';
     protected $serieTitle = 'div  a.my-2.text-sm.font-medium.text-white';
     protected $serieCover = 'div  a.relative.transition img';
 
-    // Constants related to URLs
+    //Selector related to URLs
     protected $url = "https://reaperscans.com/comics?page=";
 
-    // Constants related to chapters
+    //Selectos related to chapters
     protected $chaptersList = 'body  div.flex.flex-col.h-screen.justify-between main div div div.max-w-6xl.bg-white.rounded.mt-6  div.pb-4  div  div  ul li';
     protected $chapterTitle = 'a  div  div.min-w-0.flex-1 div div.flex.text-sm p';
     protected $chapterUrl = 'a';
 
-    protected $requestMaxBeforeCooldown=2;
+    protected $requestMaxBeforeCooldown=2;//edits amount of request/min to prevent being blocked
 
     public function __construct() {
         parent::__construct($this->db);
@@ -39,14 +40,8 @@ class ReaperScansScraper extends Scraper
 
 
     /**
-     * Checks chapterAmount in a serie in database and in site and adds the newests if necessary
+     * starts the process of scraping the series and chapters and adding them to the database
      */
-
-/**
-     * Checks  in database and in site and adds the newests if necessary
-     */
-
-
     public function run() {
         $noSeries=false;
         $pageIndex=1;
@@ -86,6 +81,10 @@ class ReaperScansScraper extends Scraper
         }
     }
 
+    /**
+     * is process to add chapters, uses methodhiding to override the one of the parent class
+     * is used because the website needed an unique approach
+     */
     protected function createChapters($chapterCrawler,$serie) {
 
         $noChapters=false;
@@ -128,7 +127,9 @@ class ReaperScansScraper extends Scraper
         };
     }
 
-
+    /**
+     * adds extra info, is specific to the site
+     */
     protected function addExtraInfo($chapterCrawler) {
         $info = $chapterCrawler->filter('body div.flex.flex-col.h-screen.justify-between main div.mx-auto.py-8.grid.max-w-3xl.grid-cols-1.gap-4.sm\\:px-6.lg\\:max-w-screen-2xl.lg\\:grid-flow-col-dense.lg\\:grid-cols-3 div div.focus\\:outline-none.max-w-6xl.bg-white.dark\\:bg-neutral-850.rounded.lg\\:hidden div div dl div');
         $infoSerie = [];

@@ -7,7 +7,7 @@
     </a>
     <nav id="main-nav" aria-expanded="false">
         <a class="{{ request()->routeIs('home2') ? 'active' : '' }}" href="{{ route('home2') }}">Home</a>
-      <div class="dropdown" aria-expanded="false">
+      {{-- <div class="dropdown" aria-expanded="false">
         <button class="btn2 dropbtn" >Fanfare</button>
         <div class="dropdown-content">
             <a class="{{ request()->routeIs('fanfare.instrumenten') ? 'active' : '' }}" href="{{ route('fanfare.instrumenten') }}">Instrumenten</a>
@@ -25,10 +25,9 @@
           <a class="{{ request()->routeIs('praktischeInfo.faq') ? 'active' : '' }}" href="{{ route('praktischeInfo.faq') }}">FAQ</a>
         </div>
       </div>
-      <a class="{{ request()->routeIs('sponsors') ? 'active' : '' }}" href="{{ route('sponsors') }}">Sponsors</a>
-      <a class="{{ request()->routeIs('kalender') ? 'active' : '' }}" href="{{ route('kalender') }}">Kalender</a>
-      <a class="{{request()->routeIs('about') ? 'active' : ''}}" href="{{route('about')}}">About</a>
+      <a class="{{request()->routeIs('about') ? 'active' : ''}}" href="{{route('about')}}">About</a> --}}
       @auth
+      <a class="{{request()->routeIs('bookmarks') ? 'active' : ''}}" href="{{route('bookmarks')}}">Bookmarks</a>
       <a class="{{request()->routeIs('logout') ? 'active' : ''}}" href="{{route('logout')}}">Logout</a>
       <a class="{{request()->routeIs('profile') ? 'active' : ''}}" href="{{route('dashboard')}}"><img class="avatar" src="{{ Auth::user()->avatar }}" alt=""></a>
       @else

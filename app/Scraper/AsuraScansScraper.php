@@ -12,20 +12,21 @@ use App\Exceptions\ChapterAlreadyPresentException;
 
 class AsuraScansScraper extends Scraper
 {
+    //name of the source where the Scraper scrapes from
     protected $src="AsuraScans";
 
 
     //filters Constants
-    // Constants related to series
+    // Selectors related to series
     protected $seriesList = 'div.listupd div.bs';
     protected $serieUrl = 'div a';
     protected $serieTitle = 'div a div.bigor div.tt';
     protected $serieCover = 'div a div.limit img';
 
-    // Constants related to URLs
+    // Selector related to URLs
     protected $url = 'https://asuratoon.com/manga/?page=';
 
-    // Constants related to chapters
+    // Selectors related to chapters
     protected $chaptersList = '#chapterlist ul li';
     protected $chapterTitle = 'div div a span.chapternum';
     protected $chapterUrl = 'a';
@@ -46,11 +47,9 @@ class AsuraScansScraper extends Scraper
 
 
 
-/**
-     * Checks  in database and in site and adds the newests if necessary
+    /**
+     * starts the process of scraping the series and chapters and adding them to the database
      */
-
-
     public function run() {
 
         $noSeries=false;
@@ -130,7 +129,9 @@ class AsuraScansScraper extends Scraper
 
 
 
-
+    /**
+     * adds extra info, is specific to the site
+     */
     protected function addExtraInfo($chapterCrawler) {
         $infoSerie = [];
         //echo $chapterCrawler->html();

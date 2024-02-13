@@ -5,18 +5,19 @@ use InvalidArgumentException;
 
 class RizzComicScraper extends Scraper
 {
+    //name of the source where the Scraper scrapes from
     protected $src="RizzComic";
-    //filters Constants
-    // Constants related to series
+
+    //Selectors related to series
     protected $seriesList = '#set_bs div.bs';
     protected $serieUrl = 'div a';
     protected $serieTitle = 'div a div.bigor div.tt';
     protected $serieCover = 'div a div.limit img';
 
-    // Constants related to URLs
+    //Selector related to URLs
     protected $url = "https://rizzcomic.com/series";
 
-    // Constants related to chapters
+    //Selectors related to chapters
     protected $chaptersList = '#chapterlist ul li';
     protected $chapterTitle = 'div div a span.chapternum';
     protected $chapterUrl = 'div div a';
@@ -25,10 +26,18 @@ class RizzComicScraper extends Scraper
         parent::__construct($this->db);
 
     }
+
+    /**
+     * Updates domain name of Scanlater if there is a need to change it
+     */
     public function updateDomain($newDomainName)
     {
 
     }
+
+    /**
+     * starts the process of scraping the series and chapters and adding them to the database
+     */
     public function run() {
 
         $noSeries=false;
@@ -100,6 +109,9 @@ class RizzComicScraper extends Scraper
 
     }
 
+    /**
+     * adds extra info, is specific to the site
+     */
     protected function addExtraInfo($chapterCrawler) {
         $info = $chapterCrawler->filter('div.main-info div.info-right div.tsinfo.bixbox.mobile div');
         $infoSerie = [];
