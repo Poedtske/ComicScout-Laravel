@@ -4,6 +4,7 @@ namespace App\Scraper;
 use App\Scraper\Scraper;
 use InvalidArgumentException;
 
+//this scraper is unable to scrape the chapters, chapterlist not present in extracted html
 class ResetScansScraper extends Scraper
 {
     //name of the source where the Scraper scrapes from

@@ -89,7 +89,7 @@ abstract class Scraper implements IScraper
                 if (count($chapterCrawler->filter($this->chaptersList)) == count($serie->chapters)) {
                     return;
                 } else {
-                    self::createChapters($chapterCrawler, $serie);
+                    $this->createChapters($chapterCrawler, $serie);
                 }
             }
 
@@ -205,6 +205,23 @@ abstract class Scraper implements IScraper
             $info=[];
             $info=$this->addExtraInfo($chapterCrawler);
             echo self::toString($info);
+
+
+            $chapterList = $chapterCrawler->filter($this->chaptersList);
+            echo $chapterList->html();
+            $chapterArray=[];
+
+            $chapterList->each(function($node) use(&$chapterArray)  {
+                $chapterTitle = $node->filter($this->chapterTitle)->text();
+                $chapterUrl = $node->filter($this->chapterUrl)->attr('href');
+                $chapter=['title'=>$chapterTitle,
+                'url'=>$chapterUrl,];
+            });
+            $chapterArray=array_reverse($chapterArray);
+
+            foreach ($chapterArray as $chap) {
+                echo "\n\nTitle:".$chap['title']."\nUrl:".$chap['url'];
+            };
         }
         $result=self::validateSerie($chapterCrawler);
         $scanlator=$result['scanlator'];
